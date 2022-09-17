@@ -30,7 +30,7 @@ func (repositories *campaignRepository) GetCampaigns() ([]entity.Campaign, error
 func (repositories *campaignRepository) GetCampaignById(userId int) ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
-	err := repositories.mysql.Where("user_id = ?", userId).Find(&campaigns).Error
+	err := repositories.mysql.Where("user_id = ?", userId).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error
 	if err != nil {
 		return nil, err
 	}

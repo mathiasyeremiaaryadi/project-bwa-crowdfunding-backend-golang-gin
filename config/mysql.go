@@ -26,7 +26,6 @@ func ConnectMySQL() *gorm.DB {
 
 	fmt.Println("MySQL Database is Connected")
 
-	db.Migrator().DropTable(&entity.User{})
 	err = db.AutoMigrate(&entity.User{})
 	if err != nil {
 		log.Fatal(err.Error())

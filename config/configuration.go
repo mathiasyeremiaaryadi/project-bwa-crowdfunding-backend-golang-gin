@@ -18,7 +18,7 @@ var env = map[string]map[string]string{
 		"MYSQL_PORT":   "3306",
 		"MYSQL_USER":   "root",
 		"MYSQL_PASS":   "",
-		"MYSQL_SCHEMA": "db_food_startup",
+		"MYSQL_SCHEMA": "db_campaign_startup",
 	},
 }
 
