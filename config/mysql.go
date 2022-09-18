@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+
 	"service-campaign-startup/model/entity"
 
 	"gorm.io/driver/mysql"

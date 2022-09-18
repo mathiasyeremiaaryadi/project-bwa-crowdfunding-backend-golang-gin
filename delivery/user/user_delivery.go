@@ -1,4 +1,4 @@
-package delivery
+package userdelivery
 
 import (
 	"errors"
@@ -8,17 +8,17 @@ import (
 	"net/http"
 	"service-campaign-startup/model/dto"
 	"service-campaign-startup/model/entity"
-	"service-campaign-startup/usecase"
+	userusecase "service-campaign-startup/usecase/user"
 	"service-campaign-startup/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 type userDelivery struct {
-	userUseCase usecase.UserUseCase
+	userUseCase userusecase.UserUseCase
 }
 
-func NewUserDelivery(userUseCase usecase.UserUseCase) UserDelivery {
+func NewUserDelivery(userUseCase userusecase.UserUseCase) UserDelivery {
 	return &userDelivery{
 		userUseCase: userUseCase,
 	}

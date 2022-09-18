@@ -1,11 +1,11 @@
-package usecase
+package userusecase
 
 import (
 	"errors"
 	"net/http"
 	"service-campaign-startup/model/dto"
 	"service-campaign-startup/model/entity"
-	"service-campaign-startup/repository"
+	userrepository "service-campaign-startup/repository/user"
 	"service-campaign-startup/utils"
 
 	"golang.org/x/crypto/bcrypt"
@@ -13,11 +13,11 @@ import (
 )
 
 type userUseCase struct {
-	userRepository repository.UserRepository
+	userRepository userrepository.UserRepository
 	jwtService     utils.JWT
 }
 
-func NewUserUseCase(userRepository repository.UserRepository, jwtService utils.JWT) UserUseCase {
+func NewUserUseCase(userRepository userrepository.UserRepository, jwtService utils.JWT) UserUseCase {
 	return &userUseCase{
 		userRepository: userRepository,
 		jwtService:     jwtService,

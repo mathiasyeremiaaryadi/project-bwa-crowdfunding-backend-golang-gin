@@ -2,16 +2,17 @@ package app
 
 import (
 	"net/http"
-	"service-campaign-startup/model/dto"
-	"service-campaign-startup/usecase"
-	"service-campaign-startup/utils"
 	"strings"
+
+	"service-campaign-startup/model/dto"
+	userusecase "service-campaign-startup/usecase/user"
+	"service-campaign-startup/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func AuthMiddleware(userUseCase usecase.UserUseCase, jwtService utils.JWT) gin.HandlerFunc {
+func AuthMiddleware(userUseCase userusecase.UserUseCase, jwtService utils.JWT) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 

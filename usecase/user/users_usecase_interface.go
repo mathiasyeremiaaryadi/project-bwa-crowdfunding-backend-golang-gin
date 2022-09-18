@@ -1,4 +1,4 @@
-package usecase
+package userusecase
 
 import (
 	"service-campaign-startup/model/dto"

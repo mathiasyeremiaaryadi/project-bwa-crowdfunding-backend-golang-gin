@@ -1,24 +1,28 @@
-package delivery
+package campaigndelivery
 
 import (
 	"net/http"
-	"service-campaign-startup/usecase"
+	"strconv"
+
+	campaignusecase "service-campaign-startup/usecase/campaign"
 
 	"github.com/gin-gonic/gin"
 )
 
 type campaignDelivery struct {
-	campaignUseCase usecase.CampaignUseCase
+	campaignUseCase campaignusecase.CampaignUseCase
 }
 
-func NewCampaignDelivery(campaignUseCase usecase.CampaignUseCase) CampaignDelivery {
+func NewCampaignDelivery(campaignUseCase campaignusecase.CampaignUseCase) CampaignDelivery {
 	return &campaignDelivery{
 		campaignUseCase: campaignUseCase,
 	}
 }
 
 func (deliveries *campaignDelivery) GetCampaigns(c *gin.Context) {
-	response := deliveries.campaignUseCase.GetCampaigns()
+	userId, _ := strconv.Atoi(c.Query(("user_id")))
+
+	response := deliveries.campaignUseCase.GetCampaigns(userId)
 	if response.Meta.Code == http.StatusInternalServerError {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		return

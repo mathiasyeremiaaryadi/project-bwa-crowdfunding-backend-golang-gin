@@ -1,4 +1,4 @@
-package repository
+package userrepository
 
 import (
 	"service-campaign-startup/model/entity"

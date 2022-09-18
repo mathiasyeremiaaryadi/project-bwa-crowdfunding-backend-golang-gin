@@ -1,7 +1,7 @@
-package usecase
+package campaignusecase
 
 import "service-campaign-startup/model/dto"
 
 type CampaignUseCase interface {
-	GetCampaigns() *dto.ResponseContainer
+	GetCampaigns(userId int) *dto.ResponseContainer
 }

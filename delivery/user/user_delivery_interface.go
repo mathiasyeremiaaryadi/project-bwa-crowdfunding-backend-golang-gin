@@ -1,4 +1,4 @@
-package delivery
+package userdelivery
 
 import (
 	"github.com/gin-gonic/gin"

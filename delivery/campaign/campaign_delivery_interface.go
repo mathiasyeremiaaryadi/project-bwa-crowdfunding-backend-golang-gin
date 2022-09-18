@@ -1,4 +1,4 @@
-package delivery
+package campaigndelivery
 
 import (
 	"github.com/gin-gonic/gin"

@@ -2,8 +2,12 @@ package app
 
 import (
 	"service-campaign-startup/delivery"
-	"service-campaign-startup/repository"
-	"service-campaign-startup/usecase"
+	campaigndelivery "service-campaign-startup/delivery/campaign"
+	userdelivery "service-campaign-startup/delivery/user"
+	campaignrepository "service-campaign-startup/repository/campaign"
+	userrepository "service-campaign-startup/repository/user"
+	campaignusecase "service-campaign-startup/usecase/campaign"
+	userusecase "service-campaign-startup/usecase/user"
 	"service-campaign-startup/utils"
 
 	"github.com/gin-gonic/gin"
@@ -14,13 +18,13 @@ func InitRoute(mysql *gorm.DB) *gin.Engine {
 
 	jwtService := utils.NewJwtService()
 
-	userRepository := repository.NewUserRepository(mysql)
-	userUseCase := usecase.NewUserUseCase(userRepository, jwtService)
-	userDelivery := delivery.NewUserDelivery(userUseCase)
+	userRepository := userrepository.NewUserRepository(mysql)
+	userUseCase := userusecase.NewUserUseCase(userRepository, jwtService)
+	userDelivery := userdelivery.NewUserDelivery(userUseCase)
 
-	campaignRepository := repository.NewCampaignRepository(mysql)
-	campaignUseCase := usecase.NewCampaignUseCase(campaignRepository)
-	campaignDelivery := delivery.NewCampaignDelivery(campaignUseCase)
+	campaignRepository := campaignrepository.NewCampaignRepository(mysql)
+	campaignUseCase := campaignusecase.NewCampaignUseCase(campaignRepository)
+	campaignDelivery := campaigndelivery.NewCampaignDelivery(campaignUseCase)
 
 	router := gin.Default()
 

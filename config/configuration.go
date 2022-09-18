@@ -4,9 +4,7 @@ import (
 	"os"
 )
 
-const (
-	LOCAL = "local"
-)
+const LOCAL = "local"
 
 const ENVIRONMENT string = LOCAL
 
