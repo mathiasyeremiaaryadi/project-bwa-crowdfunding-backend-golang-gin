@@ -19,7 +19,7 @@ func NewCampaignRepository(mysql *gorm.DB) CampaignRepository {
 func (repositories *campaignRepository) GetCampaigns() ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
-	err := repositories.mysql.Find(&campaigns).Error
+	err := repositories.mysql.Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error
 	if err != nil {
 		return nil, err
 	}
