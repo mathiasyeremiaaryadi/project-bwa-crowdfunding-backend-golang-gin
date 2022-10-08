@@ -6,4 +6,5 @@ import (
 
 type CampaignDelivery interface {
 	GetCampaigns(c *gin.Context)
+	GetCampaignById(c *gin.Context)
 }

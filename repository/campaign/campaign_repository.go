@@ -27,7 +27,7 @@ func (repositories *campaignRepository) GetCampaigns() ([]entity.Campaign, error
 	return campaigns, nil
 }
 
-func (repositories *campaignRepository) GetCampaignById(userId int) ([]entity.Campaign, error) {
+func (repositories *campaignRepository) GetCampaignByUserId(userId int) ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
 	err := repositories.mysql.Where("user_id = ?", userId).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error
@@ -36,4 +36,15 @@ func (repositories *campaignRepository) GetCampaignById(userId int) ([]entity.Ca
 	}
 
 	return campaigns, nil
+}
+
+func (repositories *campaignRepository) GetCampaignById(campaignId int) (entity.Campaign, error) {
+	var campaign entity.Campaign
+
+	err := repositories.mysql.Preload("User").Preload("CampaignImages").Where("id = ?", campaignId).Find(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
 }

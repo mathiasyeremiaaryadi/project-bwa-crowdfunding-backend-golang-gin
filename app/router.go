@@ -27,6 +27,7 @@ func InitRoute(mysql *gorm.DB) *gin.Engine {
 	campaignDelivery := campaigndelivery.NewCampaignDelivery(campaignUseCase)
 
 	router := gin.Default()
+	router.Static("/images", "./images")
 
 	apiRouter := router.Group("/api/v1")
 	{
@@ -36,6 +37,7 @@ func InitRoute(mysql *gorm.DB) *gin.Engine {
 		apiRouter.POST("/avatars", AuthMiddleware(userUseCase, jwtService), userDelivery.SaveUserAvatar)
 
 		apiRouter.GET("/campaigns", campaignDelivery.GetCampaigns)
+		apiRouter.GET("/campaigns/:id", campaignDelivery.GetCampaignById)
 	}
 
 	router.NoRoute(delivery.NoRoute)

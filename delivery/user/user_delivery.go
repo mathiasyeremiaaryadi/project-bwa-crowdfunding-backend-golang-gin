@@ -27,9 +27,9 @@ func NewUserDelivery(userUseCase userusecase.UserUseCase) UserDelivery {
 func (deliveries *userDelivery) RegisterUser(c *gin.Context) {
 	var request dto.UserRegisterRequest
 
-	errBind := c.ShouldBindJSON(&request)
-	if errBind != nil && errors.Is(errBind, io.EOF) {
-		err := map[string]interface{}{"ERROR": errBind.Error()}
+	err := c.ShouldBindJSON(&request)
+	if err != nil && errors.Is(err, io.EOF) {
+		err := map[string]interface{}{"ERROR": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -40,8 +40,8 @@ func (deliveries *userDelivery) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	if errBind != nil {
-		errors := utils.ValidationFormatter(errBind)
+	if err != nil {
+		errors := utils.ValidationFormatter(err)
 		err := map[string]interface{}{"ERROR": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
@@ -65,9 +65,9 @@ func (deliveries *userDelivery) RegisterUser(c *gin.Context) {
 func (deliveries *userDelivery) LoginUser(c *gin.Context) {
 	var request dto.UserLoginRequest
 
-	errBind := c.ShouldBindJSON(&request)
-	if errBind != nil && errors.Is(errBind, io.EOF) {
-		err := map[string]interface{}{"ERROR": errBind.Error()}
+	err := c.ShouldBindJSON(&request)
+	if err != nil && errors.Is(err, io.EOF) {
+		err := map[string]interface{}{"ERROR": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -78,8 +78,8 @@ func (deliveries *userDelivery) LoginUser(c *gin.Context) {
 		return
 	}
 
-	if errBind != nil {
-		errors := utils.ValidationFormatter(errBind)
+	if err != nil {
+		errors := utils.ValidationFormatter(err)
 		err := map[string]interface{}{"ERROR": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
@@ -108,9 +108,9 @@ func (deliveries *userDelivery) LoginUser(c *gin.Context) {
 func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 	var request dto.EmailCheckRequest
 
-	errBind := c.ShouldBindJSON(&request)
-	if errBind != nil && errors.Is(errBind, io.EOF) {
-		err := map[string]interface{}{"ERROR": errBind.Error()}
+	err := c.ShouldBindJSON(&request)
+	if err != nil && errors.Is(err, io.EOF) {
+		err := map[string]interface{}{"ERROR": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -121,8 +121,8 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 		return
 	}
 
-	if errBind != nil {
-		errors := utils.ValidationFormatter(errBind)
+	if err != nil {
+		errors := utils.ValidationFormatter(err)
 		err := map[string]interface{}{"ERROR": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
@@ -136,7 +136,7 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 
 	isEmailExist, err := deliveries.userUseCase.GetUserByEmail(request)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": errBind.Error()}
+		err := map[string]interface{}{"ERROR": err.Error()}
 		response := dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
@@ -170,9 +170,9 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 func (deliveries *userDelivery) GetUserById(c *gin.Context) {
 	var request dto.EmailCheckRequest
 
-	errBind := c.ShouldBindJSON(&request)
-	if errBind != nil && errors.Is(errBind, io.EOF) {
-		err := map[string]interface{}{"ERROR": errBind.Error()}
+	err := c.ShouldBindJSON(&request)
+	if err != nil && errors.Is(err, io.EOF) {
+		err := map[string]interface{}{"ERROR": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -183,8 +183,8 @@ func (deliveries *userDelivery) GetUserById(c *gin.Context) {
 		return
 	}
 
-	if errBind != nil {
-		errors := utils.ValidationFormatter(errBind)
+	if err != nil {
+		errors := utils.ValidationFormatter(err)
 		err := map[string]interface{}{"ERROR": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
@@ -198,7 +198,7 @@ func (deliveries *userDelivery) GetUserById(c *gin.Context) {
 
 	isEmailExist, err := deliveries.userUseCase.GetUserByEmail(request)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": errBind.Error()}
+		err := map[string]interface{}{"ERROR": err.Error()}
 		response := dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",

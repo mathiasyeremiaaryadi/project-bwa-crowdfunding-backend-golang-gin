@@ -15,11 +15,11 @@ type User struct {
 }
 
 type UserCreated struct {
-	ID         uint   `json:"ID"`
-	Name       string `json:"NAME"`
-	Occupation string `json:"OCCUPATION"`
-	Email      string `json:"EMAIL"`
-	Token      string `json:"TOKEN"`
+	ID         uint   `json:"id"`
+	Name       string `json:"name"`
+	Occupation string `json:"occupation"`
+	Email      string `json:"email"`
+	Token      string `json:"token"`
 }
 
 func UserCreatedFormatter(user User, token string) UserCreated {

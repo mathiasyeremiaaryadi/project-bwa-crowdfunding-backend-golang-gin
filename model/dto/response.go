@@ -1,14 +1,14 @@
 package dto
 
 type ResponseContainer struct {
-	Meta MetaData    `json:"META"`
-	Data interface{} `json:"DATA"`
+	Meta MetaData    `json:"meta"`
+	Data interface{} `json:"data"`
 }
 
 type MetaData struct {
-	Message interface{} `json:"MESSAGE"`
-	Status  string      `json:"STATUS"`
-	Code    int         `json:"CODE"`
+	Message interface{} `json:"message"`
+	Status  string      `json:"status"`
+	Code    int         `json:"code"`
 }
 
 func BuildResponse(message string, status string, code int, data interface{}) *ResponseContainer {
