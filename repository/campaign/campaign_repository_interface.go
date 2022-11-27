@@ -6,4 +6,5 @@ type CampaignRepository interface {
 	GetCampaigns() ([]entity.Campaign, error)
 	GetCampaignByUserId(userId int) ([]entity.Campaign, error)
 	GetCampaignById(campaignId int) (entity.Campaign, error)
+	CreateCampaign(entity.Campaign) (entity.Campaign, error)
 }

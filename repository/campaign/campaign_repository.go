@@ -48,3 +48,12 @@ func (repositories *campaignRepository) GetCampaignById(campaignId int) (entity.
 
 	return campaign, nil
 }
+
+func (repositories *campaignRepository) CreateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
+	err := repositories.mysql.Create(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+}

@@ -67,7 +67,7 @@ type GetCampaignImageDetail struct {
 	IsPrimary bool   `json:"is_primary"`
 }
 
-func getCampaignFormatter(campaign Campaign) GetCampaign {
+func GetCampaignFormatter(campaign Campaign) GetCampaign {
 	var getCampaignFormatter GetCampaign
 	getCampaignFormatter.ID = campaign.ID
 	getCampaignFormatter.UserId = campaign.UserId
@@ -89,7 +89,7 @@ func GetCampaignsFormatter(campaigns []Campaign) []GetCampaign {
 	var getCampaignsFormatter []GetCampaign
 
 	for _, campaign := range campaigns {
-		getCampaignFormatter := getCampaignFormatter(campaign)
+		getCampaignFormatter := GetCampaignFormatter(campaign)
 		getCampaignsFormatter = append(getCampaignsFormatter, getCampaignFormatter)
 	}
 
