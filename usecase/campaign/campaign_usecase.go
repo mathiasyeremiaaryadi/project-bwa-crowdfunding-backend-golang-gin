@@ -125,7 +125,6 @@ func (usecases *campaignUseCase) CreateCampaign(request dto.CreateCampaignReques
 	campaign.UserId = request.User.ID
 
 	slugName := fmt.Sprintf("%s %d", request.Name, request.User.ID)
-
 	campaign.Slug = slug.Make(slugName)
 
 	campaign, err := usecases.campaignRepository.CreateCampaign(campaign)
