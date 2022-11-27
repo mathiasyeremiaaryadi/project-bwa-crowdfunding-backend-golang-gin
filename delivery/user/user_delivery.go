@@ -29,7 +29,7 @@ func (deliveries *userDelivery) RegisterUser(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -42,7 +42,7 @@ func (deliveries *userDelivery) RegisterUser(c *gin.Context) {
 
 	if err != nil {
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"ERROR": errors}
+		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
@@ -67,7 +67,7 @@ func (deliveries *userDelivery) LoginUser(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -80,7 +80,7 @@ func (deliveries *userDelivery) LoginUser(c *gin.Context) {
 
 	if err != nil {
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"ERROR": errors}
+		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
@@ -110,7 +110,7 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -123,7 +123,7 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 
 	if err != nil {
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"ERROR": errors}
+		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
@@ -136,7 +136,7 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 
 	isEmailExist, err := deliveries.userUseCase.GetUserByEmail(request)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
@@ -172,7 +172,7 @@ func (deliveries *userDelivery) GetUserById(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -185,7 +185,7 @@ func (deliveries *userDelivery) GetUserById(c *gin.Context) {
 
 	if err != nil {
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"ERROR": errors}
+		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
@@ -198,7 +198,7 @@ func (deliveries *userDelivery) GetUserById(c *gin.Context) {
 
 	isEmailExist, err := deliveries.userUseCase.GetUserByEmail(request)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
@@ -233,7 +233,7 @@ func (deliveries *userDelivery) SaveUserAvatar(c *gin.Context) {
 	file, err := c.FormFile("AVATAR")
 	if err != nil {
 		log.Println(err.Error())
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Avatar upload failed",
 			"FAILED",
@@ -249,7 +249,7 @@ func (deliveries *userDelivery) SaveUserAvatar(c *gin.Context) {
 	err = c.SaveUploadedFile(file, fullPath)
 	if err != nil {
 		log.Println(err.Error())
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Avatar upload failed",
 			"FAILED",

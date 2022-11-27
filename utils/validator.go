@@ -1,6 +1,8 @@
 package utils
 
-import "github.com/go-playground/validator/v10"
+import (
+	"github.com/go-playground/validator/v10"
+)
 
 func ValidationFormatter(err error) []string {
 	var errors []string

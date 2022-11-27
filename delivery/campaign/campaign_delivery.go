@@ -48,7 +48,7 @@ func (deliveries *campaignDelivery) GetCampaignById(c *gin.Context) {
 	err := c.ShouldBindUri(&campaignUri)
 	if err != nil {
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"ERROR": errors}
+		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"URI validation failed",
 			"FAILED",
@@ -79,7 +79,7 @@ func (deliveries *campaignDelivery) CreateCampaign(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -92,7 +92,8 @@ func (deliveries *campaignDelivery) CreateCampaign(c *gin.Context) {
 
 	if err != nil {
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"ERROR": errors}
+
+		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
@@ -112,4 +113,5 @@ func (deliveries *campaignDelivery) CreateCampaign(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, response)
 }
