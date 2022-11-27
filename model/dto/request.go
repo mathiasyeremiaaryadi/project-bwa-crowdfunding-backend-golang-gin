@@ -22,7 +22,7 @@ type CampaignUri struct {
 	ID int `uri:"id" binding:"required"`
 }
 
-type CreateCampaignRequest struct {
+type CampaignRequest struct {
 	Name             string `json:"name" binding:"required"`
 	ShortDescription string `json:"short_description" binding:"required"`
 	Description      string `json:"description" binding:"required"`

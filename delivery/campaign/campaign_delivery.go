@@ -75,7 +75,7 @@ func (deliveries *campaignDelivery) GetCampaignById(c *gin.Context) {
 }
 
 func (deliveries *campaignDelivery) CreateCampaign(c *gin.Context) {
-	var request dto.CreateCampaignRequest
+	var request dto.CampaignRequest
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil && errors.Is(err, io.EOF) {
@@ -108,6 +108,62 @@ func (deliveries *campaignDelivery) CreateCampaign(c *gin.Context) {
 	request.User = authenticatedUser
 
 	response := deliveries.campaignUseCase.CreateCampaign(request)
+	if response.Meta.Code == http.StatusInternalServerError {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (deliveries *campaignDelivery) UpdateCampaign(c *gin.Context) {
+	var request dto.CampaignRequest
+	var campaignId dto.CampaignUri
+
+	err := c.ShouldBindUri(&campaignId)
+	if err != nil {
+		err := map[string]interface{}{"errors": err.Error()}
+		response := dto.BuildResponse(
+			"Body request bind failed",
+			"FAILED",
+			http.StatusBadRequest,
+			err,
+		)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	err = c.ShouldBindJSON(&request)
+	if err != nil && errors.Is(err, io.EOF) {
+		err := map[string]interface{}{"errors": err.Error()}
+		response := dto.BuildResponse(
+			"Body request bind failed",
+			"FAILED",
+			http.StatusBadRequest,
+			err,
+		)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	if err != nil {
+		errors := utils.ValidationFormatter(err)
+
+		err := map[string]interface{}{"errors": errors}
+		response := dto.BuildResponse(
+			"Body request validation failed",
+			"FAILED",
+			http.StatusBadRequest,
+			err,
+		)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	authenticatedUser := c.MustGet("authenticatedUser").(entity.User)
+	request.User = authenticatedUser
+
+	response := deliveries.campaignUseCase.UpdateCampaign(campaignId, request)
 	if response.Meta.Code == http.StatusInternalServerError {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		return

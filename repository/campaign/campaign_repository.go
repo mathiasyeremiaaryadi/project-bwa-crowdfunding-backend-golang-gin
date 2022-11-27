@@ -57,3 +57,12 @@ func (repositories *campaignRepository) CreateCampaign(campaign entity.Campaign)
 
 	return campaign, nil
 }
+
+func (repositories *campaignRepository) UpdateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
+	err := repositories.mysql.Save(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+}

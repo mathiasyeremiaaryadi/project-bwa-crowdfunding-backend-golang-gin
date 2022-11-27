@@ -39,6 +39,7 @@ func InitRoute(mysql *gorm.DB) *gin.Engine {
 		apiRouter.GET("/campaigns", campaignDelivery.GetCampaigns)
 		apiRouter.GET("/campaigns/:id", campaignDelivery.GetCampaignById)
 		apiRouter.POST("/campaigns", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaign)
+		apiRouter.PUT("/campaigns/:id", AuthMiddleware(userUseCase, jwtService), campaignDelivery.UpdateCampaign)
 
 	}
 
