@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"service-campaign-startup/model/dto"
 	"service-campaign-startup/model/entity"
@@ -24,36 +23,35 @@ func NewUserDelivery(userUseCase userusecase.UserUseCase) UserDelivery {
 	}
 }
 
-func (deliveries *userDelivery) RegisterUser(c *gin.Context) {
+func (d *userDelivery) RegisterUser(c *gin.Context) {
 	var request dto.UserRegisterRequest
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"errors": err.Error()}
-		response := dto.BuildResponse(
-			"Body request bind failed",
-			"FAILED",
-			http.StatusBadRequest,
-			err,
-		)
-		c.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		if errors.Is(err, io.EOF) {
+			response := dto.BuildResponse(
+				"Body request bind failed",
+				"FAILED",
+				http.StatusBadRequest,
+				map[string]interface{}{"errors": err.Error()},
+			)
 
-	if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, response)
+			return
+		}
+
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": errors},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := deliveries.userUseCase.RegisterUser(request)
+	response := d.userUseCase.RegisterUser(request)
 	if response.Meta.Code == http.StatusInternalServerError {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		return
@@ -62,50 +60,107 @@ func (deliveries *userDelivery) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-func (deliveries *userDelivery) LoginUser(c *gin.Context) {
+func (d *userDelivery) LoginUser(c *gin.Context) {
 	var request dto.UserLoginRequest
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"errors": err.Error()}
-		response := dto.BuildResponse(
-			"Body request bind failed",
-			"FAILED",
-			http.StatusBadRequest,
-			err,
-		)
-		c.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		if errors.Is(err, io.EOF) {
+			response := dto.BuildResponse(
+				"Body request bind failed",
+				"FAILED",
+				http.StatusBadRequest,
+				map[string]interface{}{"errors": err.Error()},
+			)
 
-	if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, response)
+			return
+		}
+
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": errors},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := deliveries.userUseCase.LoginUser(request)
-	if response.Meta.Code == http.StatusInternalServerError {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
-		return
-	}
-
-	if response.Meta.Code == http.StatusUnauthorized {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+	response := d.userUseCase.LoginUser(request)
+	if response.Meta.Code != http.StatusInternalServerError {
+		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
 	}
 
 	c.JSON(http.StatusOK, response)
 }
 
-func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
+func (d *userDelivery) GetUserByEmail(c *gin.Context) {
+	var request dto.EmailCheckRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		if errors.Is(err, io.EOF) {
+			response := dto.BuildResponse(
+				"Body request bind failed",
+				"FAILED",
+				http.StatusBadRequest,
+				map[string]interface{}{"errors": err.Error()},
+			)
+
+			c.AbortWithStatusJSON(http.StatusBadRequest, response)
+			return
+		}
+
+		errors := utils.ValidationFormatter(err)
+		response := dto.BuildResponse(
+			"Body request validation failed",
+			"FAILED",
+			http.StatusBadRequest,
+			map[string]interface{}{"errors": errors},
+		)
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	isEmailExist, err := d.userUseCase.GetUserByEmail(request)
+	if err != nil {
+		response := dto.BuildResponse(
+			"Database query error or database connection problem",
+			"FAILED",
+			http.StatusInternalServerError,
+			map[string]interface{}{"errors": err.Error()},
+		)
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	if isEmailExist {
+		response := dto.BuildResponse(
+			"Email registration faled",
+			"FAILED",
+			http.StatusUnprocessableEntity,
+			"Email already registered",
+		)
+
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	response := dto.BuildResponse(
+		"Email has retrieved successfully",
+		"SUCCESS",
+		http.StatusOK,
+		"Email is available",
+	)
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (d *userDelivery) GetUserById(c *gin.Context) {
 	var request dto.EmailCheckRequest
 
 	err := c.ShouldBindJSON(&request)
@@ -134,7 +189,7 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 		return
 	}
 
-	isEmailExist, err := deliveries.userUseCase.GetUserByEmail(request)
+	isEmailRegistered, err := d.userUseCase.GetUserByEmail(request)
 	if err != nil {
 		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
@@ -147,7 +202,7 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 		return
 	}
 
-	if isEmailExist {
+	if isEmailRegistered {
 		response := dto.BuildResponse(
 			"Email registration faled",
 			"FAILED",
@@ -167,112 +222,50 @@ func (deliveries *userDelivery) GetUserByEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (deliveries *userDelivery) GetUserById(c *gin.Context) {
-	var request dto.EmailCheckRequest
-
-	err := c.ShouldBindJSON(&request)
-	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"errors": err.Error()}
-		response := dto.BuildResponse(
-			"Body request bind failed",
-			"FAILED",
-			http.StatusBadRequest,
-			err,
-		)
-		c.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
-
-	if err != nil {
-		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"errors": errors}
-		response := dto.BuildResponse(
-			"Body request validation failed",
-			"FAILED",
-			http.StatusBadRequest,
-			err,
-		)
-		c.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
-
-	isEmailExist, err := deliveries.userUseCase.GetUserByEmail(request)
-	if err != nil {
-		err := map[string]interface{}{"errors": err.Error()}
-		response := dto.BuildResponse(
-			"Database query error or database connection problem",
-			"FAILED",
-			http.StatusInternalServerError,
-			err,
-		)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
-		return
-	}
-
-	if isEmailExist {
-		response := dto.BuildResponse(
-			"Email registration faled",
-			"FAILED",
-			http.StatusUnprocessableEntity,
-			"Email already registered",
-		)
-		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	response := dto.BuildResponse(
-		"Email has retrieved successfully",
-		"SUCCESS",
-		http.StatusOK,
-		"Email is available",
-	)
-	c.JSON(http.StatusOK, response)
-}
-
-func (deliveries *userDelivery) SaveUserAvatar(c *gin.Context) {
+func (d *userDelivery) SaveUserAvatar(c *gin.Context) {
 	file, err := c.FormFile("AVATAR")
 	if err != nil {
-		log.Println(err.Error())
-		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Avatar upload failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": err.Error()},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	authenticatedUser := c.MustGet("authenticatedUser").(entity.User)
+	authenticatedUser, ok := c.Value("authenticatedUser").(entity.User)
+	if !ok {
+		response := dto.BuildResponse(
+			"Authentication failed",
+			"FAILED",
+			http.StatusUnauthorized,
+			"not authenticated",
+		)
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
+	}
+
 	fullPath := fmt.Sprintf("images/%d-%s", authenticatedUser.ID, file.Filename)
 	err = c.SaveUploadedFile(file, fullPath)
 	if err != nil {
-		log.Println(err.Error())
-		err := map[string]interface{}{"errors": err.Error()}
 		response := dto.BuildResponse(
 			"Avatar upload failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": err.Error()},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := deliveries.userUseCase.SaveUserAvatar(1, fullPath)
-	if response.Meta.Code == http.StatusNotFound {
-		c.AbortWithStatusJSON(http.StatusNotFound, response)
-		return
-	}
-
-	if response.Meta.Code == http.StatusInternalServerError {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
-		return
-	}
-
-	if response.Meta.Code == http.StatusBadRequest {
-		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+	response := d.userUseCase.SaveUserAvatar(1, fullPath)
+	if response.Meta.Code != http.StatusOK {
+		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
 	}
 

@@ -16,51 +16,46 @@ func NewCampaignRepository(mysql *gorm.DB) CampaignRepository {
 	}
 }
 
-func (repositories *campaignRepository) GetCampaigns() ([]entity.Campaign, error) {
+func (r *campaignRepository) GetCampaigns() ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
-	err := repositories.mysql.Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error
-	if err != nil {
+	if err := r.mysql.Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
 		return nil, err
 	}
 
 	return campaigns, nil
 }
 
-func (repositories *campaignRepository) GetCampaignByUserId(userId int) ([]entity.Campaign, error) {
+func (r *campaignRepository) GetCampaignByUserId(userId int) ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
-	err := repositories.mysql.Where("user_id = ?", userId).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error
-	if err != nil {
+	if err := r.mysql.Where("user_id = ?", userId).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
 		return nil, err
 	}
 
 	return campaigns, nil
 }
 
-func (repositories *campaignRepository) GetCampaignById(campaignId int) (entity.Campaign, error) {
+func (r *campaignRepository) GetCampaignById(campaignId int) (entity.Campaign, error) {
 	var campaign entity.Campaign
 
-	err := repositories.mysql.Preload("User").Preload("CampaignImages").Where("id = ?", campaignId).Find(&campaign).Error
-	if err != nil {
+	if err := r.mysql.Preload("User").Preload("CampaignImages").Where("id = ?", campaignId).Find(&campaign).Error; err != nil {
 		return campaign, err
 	}
 
 	return campaign, nil
 }
 
-func (repositories *campaignRepository) CreateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
-	err := repositories.mysql.Create(&campaign).Error
-	if err != nil {
+func (r *campaignRepository) CreateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
+	if err := r.mysql.Create(&campaign).Error; err != nil {
 		return campaign, err
 	}
 
 	return campaign, nil
 }
 
-func (repositories *campaignRepository) UpdateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
-	err := repositories.mysql.Save(&campaign).Error
-	if err != nil {
+func (r *campaignRepository) UpdateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
+	if err := r.mysql.Save(&campaign).Error; err != nil {
 		return campaign, err
 	}
 

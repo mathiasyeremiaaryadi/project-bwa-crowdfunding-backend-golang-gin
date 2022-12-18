@@ -24,20 +24,16 @@ func NewUserUseCase(userRepository userrepository.UserRepository, jwtService uti
 	}
 }
 
-func (usecases *userUseCase) RegisterUser(request dto.UserRegisterRequest) *dto.ResponseContainer {
+func (uc *userUseCase) RegisterUser(request dto.UserRegisterRequest) *dto.ResponseContainer {
 	var user entity.User
 
-	hashedPassword, errHash := bcrypt.GenerateFromPassword(
-		[]byte(request.Password),
-		bcrypt.MinCost,
-	)
-	if errHash != nil {
-		err := map[string]interface{}{"ERROR": errHash.Error()}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.MinCost)
+	if err != nil {
 		return dto.BuildResponse(
 			"Password hash failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
@@ -47,25 +43,23 @@ func (usecases *userUseCase) RegisterUser(request dto.UserRegisterRequest) *dto.
 	user.PasswordHash = string(hashedPassword)
 	user.Role = "user"
 
-	user, err := usecases.userRepository.RegisterUser(user)
+	user, err = uc.userRepository.RegisterUser(user)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": errHash.Error()}
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
-	token, err := usecases.jwtService.GenerateToken(int(user.ID))
+	token, err := uc.jwtService.GenerateToken(int(user.ID))
 	if err != nil {
-		err := map[string]interface{}{"ERROR": errHash.Error()}
 		return dto.BuildResponse(
 			"Token generation failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
@@ -78,57 +72,42 @@ func (usecases *userUseCase) RegisterUser(request dto.UserRegisterRequest) *dto.
 	)
 }
 
-func (usecases *userUseCase) LoginUser(request dto.UserLoginRequest) *dto.ResponseContainer {
-	var user entity.User
-	var email string
-	var password string
-
-	email = request.Email
-	password = request.Password
-
-	user, err := usecases.userRepository.GetUserByEmail(email)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		err := map[string]interface{}{"ERROR": err.Error()}
-		return dto.BuildResponse(
-			"Authentication failed",
-			"FAILED",
-			http.StatusUnauthorized,
-			err,
-		)
-	}
-
+func (uc *userUseCase) LoginUser(request dto.UserLoginRequest) *dto.ResponseContainer {
+	user, err := uc.userRepository.GetUserByEmail(request.Email)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.BuildResponse(
+				"Authentication failed",
+				"FAILED",
+				http.StatusUnauthorized,
+				map[string]interface{}{"ERROR": err.Error()},
+			)
+		}
+
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
-	errVerify := bcrypt.CompareHashAndPassword(
-		[]byte(user.PasswordHash),
-		[]byte(password),
-	)
-	if errVerify != nil {
-		err := map[string]interface{}{"ERROR": errVerify.Error()}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password)); err != nil {
 		return dto.BuildResponse(
 			"Authentication failed",
 			"FAILED",
 			http.StatusUnauthorized,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
-	token, err := usecases.jwtService.GenerateToken(int(user.ID))
+	token, err := uc.jwtService.GenerateToken(int(user.ID))
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"Token generation failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
@@ -141,27 +120,20 @@ func (usecases *userUseCase) LoginUser(request dto.UserLoginRequest) *dto.Respon
 	)
 }
 
-func (usecases *userUseCase) GetUserByEmail(request dto.EmailCheckRequest) (bool, error) {
-	email := request.Email
-
-	_, err := usecases.userRepository.GetUserByEmail(email)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
-	}
-
+func (uc *userUseCase) GetUserByEmail(request dto.EmailCheckRequest) (bool, error) {
+	_, err := uc.userRepository.GetUserByEmail(request.Email)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
 		return false, err
 	}
 
 	return true, nil
 }
 
-func (usecases *userUseCase) GetUserById(id int) (entity.User, error) {
-	user, err := usecases.userRepository.GetUserById(id)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return user, err
-	}
-
+func (uc *userUseCase) GetUserById(id int) (entity.User, error) {
+	user, err := uc.userRepository.GetUserById(id)
 	if err != nil {
 		return user, err
 	}
@@ -169,37 +141,34 @@ func (usecases *userUseCase) GetUserById(id int) (entity.User, error) {
 	return user, nil
 }
 
-func (usecases *userUseCase) SaveUserAvatar(id int, fileLocation string) *dto.ResponseContainer {
-	user, err := usecases.userRepository.GetUserById(id)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		err := map[string]interface{}{"ERROR": err.Error()}
-		return dto.BuildResponse(
-			"User not found",
-			"FAILED",
-			http.StatusNotFound,
-			err,
-		)
-	}
-
+func (uc *userUseCase) SaveUserAvatar(id int, fileLocation string) *dto.ResponseContainer {
+	user, err := uc.userRepository.GetUserById(id)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.BuildResponse(
+				"User not found",
+				"FAILED",
+				http.StatusNotFound,
+				map[string]interface{}{"ERROR": err.Error()},
+			)
+		}
+
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
 	user.AvatarFileName = fileLocation
-	user, err = usecases.userRepository.UpdateUser(user)
+	user, err = uc.userRepository.UpdateUser(user)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"Avatar updation failed",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 

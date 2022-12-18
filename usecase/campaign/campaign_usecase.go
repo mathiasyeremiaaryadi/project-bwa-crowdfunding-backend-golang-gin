@@ -21,101 +21,73 @@ func NewCampaignUseCase(campaignRepository campaignrepository.CampaignRepository
 	}
 }
 
-func (usecases *campaignUseCase) GetCampaigns(userId int) *dto.ResponseContainer {
+func (uc *campaignUseCase) GetCampaigns(userId int) *dto.ResponseContainer {
+	var campaigns []entity.Campaign
+	var err error
+
 	if userId != 0 {
-		campaigns, err := usecases.campaignRepository.GetCampaignByUserId(userId)
-		if err != nil {
-			err := map[string]interface{}{"ERROR": err.Error()}
-			return dto.BuildResponse(
-				"Database query error or database connection problem",
-				"FAILED",
-				http.StatusInternalServerError,
-				err,
-			)
-		}
-
-		if len(campaigns) == 0 {
-			err := map[string]interface{}{"ERROR": "Not Found"}
-			return dto.BuildResponse(
-				"User not found",
-				"FAILED",
-				http.StatusNotFound,
-				err,
-			)
-		}
-
-		getCampaigns := entity.GetCampaignsFormatter(campaigns)
-		return dto.BuildResponse(
-			"Users have retrieved successfully",
-			"SUCCESS",
-			http.StatusCreated,
-			getCampaigns,
-		)
+		campaigns, err = uc.campaignRepository.GetCampaignByUserId(userId)
+	} else {
+		campaigns, err = uc.campaignRepository.GetCampaigns()
 	}
 
-	campaigns, err := usecases.campaignRepository.GetCampaigns()
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
 	if len(campaigns) == 0 {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"User not found",
 			"FAILED",
 			http.StatusNotFound,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
-	getCampaigns := entity.GetCampaignsFormatter(campaigns)
+	formattedCampaigns := entity.GetCampaignsFormatter(campaigns)
 	return dto.BuildResponse(
 		"Campaigns have retrieved successfully",
 		"SUCCESS",
 		http.StatusOK,
-		getCampaigns,
+		formattedCampaigns,
 	)
 }
 
-func (usecases *campaignUseCase) GetCampaignById(campaignUri dto.CampaignUri) *dto.ResponseContainer {
-
-	campaign, err := usecases.campaignRepository.GetCampaignById(campaignUri.ID)
+func (uc *campaignUseCase) GetCampaignById(campaignUri dto.CampaignUri) *dto.ResponseContainer {
+	campaign, err := uc.campaignRepository.GetCampaignById(campaignUri.ID)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
 	if reflect.DeepEqual(campaign, entity.Campaign{}) {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"User not found",
 			"FAILED",
 			http.StatusNotFound,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
-	getCampaignDetail := entity.GetCampaignDetailFormatter(campaign)
+	campaignDetail := entity.GetCampaignDetailFormatter(campaign)
 	return dto.BuildResponse(
 		"Campaign has retrieved successfully",
 		"SUCCESS",
 		http.StatusCreated,
-		getCampaignDetail,
+		campaignDetail,
 	)
 }
 
-func (usecases *campaignUseCase) CreateCampaign(request dto.CampaignRequest) *dto.ResponseContainer {
+func (uc *campaignUseCase) CreateCampaign(request dto.CampaignRequest) *dto.ResponseContainer {
 	var campaign entity.Campaign
 	campaign.Name = request.Name
 	campaign.ShortDescription = request.ShortDescription
@@ -127,45 +99,42 @@ func (usecases *campaignUseCase) CreateCampaign(request dto.CampaignRequest) *dt
 	slugName := fmt.Sprintf("%s %d", request.Name, request.User.ID)
 	campaign.Slug = slug.Make(slugName)
 
-	campaign, err := usecases.campaignRepository.CreateCampaign(campaign)
+	campaign, err := uc.campaignRepository.CreateCampaign(campaign)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
-	getCampaignDetail := entity.GetCampaignFormatter(campaign)
+	campaignDetail := entity.GetCampaignFormatter(campaign)
 	return dto.BuildResponse(
 		"Campaign has updated successfully",
 		"SUCCESS",
 		http.StatusCreated,
-		getCampaignDetail,
+		campaignDetail,
 	)
 }
 
-func (usecases *campaignUseCase) UpdateCampaign(campaignId dto.CampaignUri, request dto.CampaignRequest) *dto.ResponseContainer {
-	campaign, err := usecases.campaignRepository.GetCampaignById(campaignId.ID)
+func (uc *campaignUseCase) UpdateCampaign(campaignId dto.CampaignUri, request dto.CampaignRequest) *dto.ResponseContainer {
+	campaign, err := uc.campaignRepository.GetCampaignById(campaignId.ID)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 
 	if campaign.UserId != request.User.ID {
-		err := map[string]interface{}{"ERROR": "Not an owner of the campaign"}
 		return dto.BuildResponse(
 			"Unauthorized",
 			"FAILED",
 			http.StatusUnauthorized,
-			err,
+			map[string]interface{}{"ERROR": "Not an owner of the campaign"},
 		)
 	}
 
@@ -176,14 +145,13 @@ func (usecases *campaignUseCase) UpdateCampaign(campaignId dto.CampaignUri, requ
 	campaign.GoalAmount = request.GoalAmount
 	campaign.UserId = request.User.ID
 
-	updatedCampaign, err := usecases.campaignRepository.UpdateCampaign(campaign)
+	updatedCampaign, err := uc.campaignRepository.UpdateCampaign(campaign)
 	if err != nil {
-		err := map[string]interface{}{"ERROR": err.Error()}
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
 			"FAILED",
 			http.StatusInternalServerError,
-			err,
+			map[string]interface{}{"ERROR": err.Error()},
 		)
 	}
 

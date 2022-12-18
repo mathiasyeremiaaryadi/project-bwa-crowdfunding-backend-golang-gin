@@ -24,90 +24,85 @@ func NewCampaignDelivery(campaignUseCase campaignusecase.CampaignUseCase) Campai
 	}
 }
 
-func (deliveries *campaignDelivery) GetCampaigns(c *gin.Context) {
+func (d *campaignDelivery) GetCampaigns(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Query(("user_id")))
 
-	response := deliveries.campaignUseCase.GetCampaigns(userId)
-	if response.Meta.Code == http.StatusInternalServerError {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
-		return
-	}
-
-	if response.Meta.Code == http.StatusNotFound {
-		c.AbortWithStatusJSON(http.StatusNotFound, response)
+	response := d.campaignUseCase.GetCampaigns(userId)
+	if response.Meta.Code != http.StatusOK {
+		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
 	}
 
 	c.JSON(http.StatusOK, response)
-
 }
 
-func (deliveries *campaignDelivery) GetCampaignById(c *gin.Context) {
+func (d *campaignDelivery) GetCampaignById(c *gin.Context) {
 	var campaignUri dto.CampaignUri
 
-	err := c.ShouldBindUri(&campaignUri)
-	if err != nil {
+	if err := c.ShouldBindUri(&campaignUri); err != nil {
 		errors := utils.ValidationFormatter(err)
-		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"URI validation failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": errors},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := deliveries.campaignUseCase.GetCampaignById(campaignUri)
-	if response.Meta.Code == http.StatusInternalServerError {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
-		return
-	}
-
-	if response.Meta.Code == http.StatusNotFound {
-		c.AbortWithStatusJSON(http.StatusNotFound, response)
+	response := d.campaignUseCase.GetCampaignById(campaignUri)
+	if response.Meta.Code != http.StatusOK {
+		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
 	}
 
 	c.JSON(http.StatusOK, response)
-
 }
 
-func (deliveries *campaignDelivery) CreateCampaign(c *gin.Context) {
+func (d *campaignDelivery) CreateCampaign(c *gin.Context) {
 	var request dto.CampaignRequest
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"errors": err.Error()}
-		response := dto.BuildResponse(
-			"Body request bind failed",
-			"FAILED",
-			http.StatusBadRequest,
-			err,
-		)
-		c.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		if errors.Is(err, io.EOF) {
+			response := dto.BuildResponse(
+				"Body request bind failed",
+				"FAILED",
+				http.StatusBadRequest,
+				map[string]interface{}{"errors": err.Error()},
+			)
 
-	if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, response)
+			return
+		}
+
 		errors := utils.ValidationFormatter(err)
-
-		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": errors},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	authenticatedUser := c.MustGet("authenticatedUser").(entity.User)
-	request.User = authenticatedUser
+	if authenticatedUser, ok := c.MustGet("authenticatedUser").(entity.User); ok {
+		request.User = authenticatedUser
+	} else {
+		response := dto.BuildResponse(
+			"Authentication failed",
+			"FAILED",
+			http.StatusUnauthorized,
+			"not authenticated",
+		)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
+	}
 
-	response := deliveries.campaignUseCase.CreateCampaign(request)
+	response := d.campaignUseCase.CreateCampaign(request)
 	if response.Meta.Code == http.StatusInternalServerError {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		return
@@ -116,54 +111,62 @@ func (deliveries *campaignDelivery) CreateCampaign(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (deliveries *campaignDelivery) UpdateCampaign(c *gin.Context) {
+func (d *campaignDelivery) UpdateCampaign(c *gin.Context) {
 	var request dto.CampaignRequest
 	var campaignId dto.CampaignUri
 
-	err := c.ShouldBindUri(&campaignId)
-	if err != nil {
-		err := map[string]interface{}{"errors": err.Error()}
+	if err := c.ShouldBindUri(&campaignId); err != nil {
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": err.Error()},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	err = c.ShouldBindJSON(&request)
-	if err != nil && errors.Is(err, io.EOF) {
-		err := map[string]interface{}{"errors": err.Error()}
-		response := dto.BuildResponse(
-			"Body request bind failed",
-			"FAILED",
-			http.StatusBadRequest,
-			err,
-		)
-		c.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		if errors.Is(err, io.EOF) {
+			response := dto.BuildResponse(
+				"Body request bind failed",
+				"FAILED",
+				http.StatusBadRequest,
+				map[string]interface{}{"errors": err.Error()},
+			)
 
-	if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, response)
+			return
+		}
+
 		errors := utils.ValidationFormatter(err)
-
-		err := map[string]interface{}{"errors": errors}
 		response := dto.BuildResponse(
 			"Body request validation failed",
 			"FAILED",
 			http.StatusBadRequest,
-			err,
+			map[string]interface{}{"errors": errors},
 		)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	authenticatedUser := c.MustGet("authenticatedUser").(entity.User)
-	request.User = authenticatedUser
+	if authenticatedUser, ok := c.Value("authenticatedUser").(entity.User); ok {
+		request.User = authenticatedUser
+	} else {
+		response := dto.BuildResponse(
+			"Authentication failed",
+			"FAILED",
+			http.StatusUnauthorized,
+			"not authenticated",
+		)
 
-	response := deliveries.campaignUseCase.UpdateCampaign(campaignId, request)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	response := d.campaignUseCase.UpdateCampaign(campaignId, request)
 	if response.Meta.Code == http.StatusInternalServerError {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		return

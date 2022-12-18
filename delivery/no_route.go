@@ -9,12 +9,11 @@ import (
 )
 
 func NoRoute(c *gin.Context) {
-	err := fmt.Sprintf("Resource or route %s is not found", c.Request.URL.Path)
 	response := dto.BuildResponse(
 		"User not found",
 		"FAILED",
 		http.StatusNotFound,
-		map[string]interface{}{"ERROR": err},
+		map[string]interface{}{"ERROR": fmt.Sprintf("Resource or route %s is not found", c.Request.URL.Path)},
 	)
 	c.AbortWithStatusJSON(http.StatusNotFound, response)
 }

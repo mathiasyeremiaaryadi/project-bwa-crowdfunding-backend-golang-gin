@@ -16,40 +16,36 @@ func NewUserRepository(mysql *gorm.DB) UserRepository {
 	}
 }
 
-func (repositories *userRepository) RegisterUser(user entity.User) (entity.User, error) {
-	err := repositories.mysql.Create(&user).Error
-	if err != nil {
+func (r *userRepository) RegisterUser(user entity.User) (entity.User, error) {
+	if err := r.mysql.Create(&user).Error; err != nil {
 		return user, err
 	}
 
 	return user, nil
 }
 
-func (repositories *userRepository) GetUserByEmail(email string) (entity.User, error) {
+func (r *userRepository) GetUserByEmail(email string) (entity.User, error) {
 	var user entity.User
 
-	err := repositories.mysql.Where("email = ?", email).Take(&user).Error
-	if err != nil {
+	if err := r.mysql.Where("email = ?", email).Take(&user).Error; err != nil {
 		return user, err
 	}
 
 	return user, nil
 }
 
-func (repositories *userRepository) GetUserById(id int) (entity.User, error) {
+func (r *userRepository) GetUserById(id int) (entity.User, error) {
 	var user entity.User
 
-	err := repositories.mysql.First(&user, id).Error
-	if err != nil {
+	if err := r.mysql.First(&user, id).Error; err != nil {
 		return user, err
 	}
 
 	return user, nil
 }
 
-func (repositories *userRepository) UpdateUser(user entity.User) (entity.User, error) {
-	err := repositories.mysql.Save(&user).Error
-	if err != nil {
+func (r *userRepository) UpdateUser(user entity.User) (entity.User, error) {
+	if err := r.mysql.Save(&user).Error; err != nil {
 		return user, err
 	}
 
