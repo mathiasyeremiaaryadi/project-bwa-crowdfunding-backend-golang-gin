@@ -132,8 +132,8 @@ func (uc *userUseCase) GetUserByEmail(request dto.EmailCheckRequest) (bool, erro
 	return true, nil
 }
 
-func (uc *userUseCase) GetUserById(id int) (entity.User, error) {
-	user, err := uc.userRepository.GetUserById(id)
+func (uc *userUseCase) GetUser(id int) (entity.User, error) {
+	user, err := uc.userRepository.GetUser(id)
 	if err != nil {
 		return user, err
 	}
@@ -142,7 +142,7 @@ func (uc *userUseCase) GetUserById(id int) (entity.User, error) {
 }
 
 func (uc *userUseCase) CreateUserAvatar(id int, fileLocation string) *dto.ResponseContainer {
-	user, err := uc.userRepository.GetUserById(id)
+	user, err := uc.userRepository.GetUser(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.BuildResponse(

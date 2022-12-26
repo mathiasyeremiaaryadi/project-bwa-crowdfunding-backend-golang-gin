@@ -10,7 +10,7 @@ type UserUseCase interface {
 	LoginUser(dto.UserLoginRequest) *dto.ResponseContainer
 
 	GetUserByEmail(dto.EmailCheckRequest) (bool, error)
-	GetUserById(int) (entity.User, error)
+	GetUser(int) (entity.User, error)
 
 	CreateUserAvatar(int, string) *dto.ResponseContainer
 }

@@ -9,7 +9,7 @@ type UserDelivery interface {
 	LoginUser(c *gin.Context)
 
 	GetUserByEmail(c *gin.Context)
-	GetUserById(c *gin.Context)
+	GetUser(c *gin.Context)
 
 	CreateUserAvatar(c *gin.Context)
 }

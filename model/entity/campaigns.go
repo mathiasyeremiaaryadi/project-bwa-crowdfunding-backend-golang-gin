@@ -13,8 +13,8 @@ type Campaign struct {
 	Description      string `gorm:"varchar(150)"`
 	Perks            string `gorm:"varchar(50)"`
 	BackerCount      int
-	GoalAmount       int       `gorm:"varchar(255)"`
-	CurrentAmount    int       `gorm:"varchar(255)"`
+	GoalAmount       int
+	CurrentAmount    int
 	Slug             string    `gorm:"varchar(50)"`
 	CreatedAt        time.Time `gorm:"autoCreateTime"`
 	UpdatedAt        time.Time `gorm:"autoUpdateTime"`
@@ -24,7 +24,7 @@ type Campaign struct {
 
 type CampaignImage struct {
 	ID         uint
-	CampaignId uint
+	CampaignID uint
 	FileName   string `gorm:"varchar(255)"`
 	IsPrimary  int
 	CreatedAt  time.Time `gorm:"autoCreateTime"`

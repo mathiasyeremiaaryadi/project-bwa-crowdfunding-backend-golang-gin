@@ -34,7 +34,7 @@ func (r *userRepository) GetUserByEmail(email string) (entity.User, error) {
 	return user, nil
 }
 
-func (r *userRepository) GetUserById(id int) (entity.User, error) {
+func (r *userRepository) GetUser(id int) (entity.User, error) {
 	var user entity.User
 
 	if err := r.mysql.First(&user, id).Error; err != nil {

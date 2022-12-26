@@ -26,9 +26,9 @@ func NewCampaignDelivery(campaignUseCase campaignusecase.CampaignUseCase) Campai
 }
 
 func (d *campaignDelivery) GetCampaigns(c *gin.Context) {
-	userId, _ := strconv.Atoi(c.Query(("user_id")))
+	userID, _ := strconv.Atoi(c.Query(("user_id")))
 
-	response := d.campaignUseCase.GetCampaigns(userId)
+	response := d.campaignUseCase.GetCampaigns(userID)
 	if response.Meta.Code != http.StatusOK {
 		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
@@ -37,7 +37,7 @@ func (d *campaignDelivery) GetCampaigns(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (d *campaignDelivery) GetCampaignById(c *gin.Context) {
+func (d *campaignDelivery) GetCampaign(c *gin.Context) {
 	var campaignUri dto.CampaignUri
 
 	if err := c.ShouldBindUri(&campaignUri); err != nil {
@@ -53,7 +53,7 @@ func (d *campaignDelivery) GetCampaignById(c *gin.Context) {
 		return
 	}
 
-	response := d.campaignUseCase.GetCampaignById(campaignUri)
+	response := d.campaignUseCase.GetCampaign(campaignUri)
 	if response.Meta.Code != http.StatusOK {
 		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
@@ -114,9 +114,9 @@ func (d *campaignDelivery) CreateCampaign(c *gin.Context) {
 
 func (d *campaignDelivery) UpdateCampaign(c *gin.Context) {
 	var request dto.CampaignRequest
-	var campaignId dto.CampaignUri
+	var CampaignID dto.CampaignUri
 
-	if err := c.ShouldBindUri(&campaignId); err != nil {
+	if err := c.ShouldBindUri(&CampaignID); err != nil {
 		response := dto.BuildResponse(
 			"Body request bind failed",
 			"FAILED",
@@ -167,7 +167,7 @@ func (d *campaignDelivery) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
-	response := d.campaignUseCase.UpdateCampaign(campaignId, request)
+	response := d.campaignUseCase.UpdateCampaign(CampaignID, request)
 	if response.Meta.Code == http.StatusInternalServerError {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		return

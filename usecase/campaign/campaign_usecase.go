@@ -21,12 +21,12 @@ func NewCampaignUseCase(campaignRepository campaignrepository.CampaignRepository
 	}
 }
 
-func (uc *campaignUseCase) GetCampaigns(userId int) *dto.ResponseContainer {
+func (uc *campaignUseCase) GetCampaigns(userID int) *dto.ResponseContainer {
 	var campaigns []entity.Campaign
 	var err error
 
-	if userId != 0 {
-		campaigns, err = uc.campaignRepository.GetCampaignByUserId(userId)
+	if userID != 0 {
+		campaigns, err = uc.campaignRepository.GetCampaignByUserID(userID)
 	} else {
 		campaigns, err = uc.campaignRepository.GetCampaigns()
 	}
@@ -58,8 +58,8 @@ func (uc *campaignUseCase) GetCampaigns(userId int) *dto.ResponseContainer {
 	)
 }
 
-func (uc *campaignUseCase) GetCampaignById(campaignUri dto.CampaignUri) *dto.ResponseContainer {
-	campaign, err := uc.campaignRepository.GetCampaignById(campaignUri.ID)
+func (uc *campaignUseCase) GetCampaign(campaignUri dto.CampaignUri) *dto.ResponseContainer {
+	campaign, err := uc.campaignRepository.GetCampaign(campaignUri.ID)
 	if err != nil {
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
@@ -118,8 +118,8 @@ func (uc *campaignUseCase) CreateCampaign(request dto.CampaignRequest) *dto.Resp
 	)
 }
 
-func (uc *campaignUseCase) UpdateCampaign(campaignId dto.CampaignUri, request dto.CampaignRequest) *dto.ResponseContainer {
-	campaign, err := uc.campaignRepository.GetCampaignById(campaignId.ID)
+func (uc *campaignUseCase) UpdateCampaign(CampaignID dto.CampaignUri, request dto.CampaignRequest) *dto.ResponseContainer {
+	campaign, err := uc.campaignRepository.GetCampaign(CampaignID.ID)
 	if err != nil {
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
@@ -164,7 +164,7 @@ func (uc *campaignUseCase) UpdateCampaign(campaignId dto.CampaignUri, request dt
 }
 
 func (uc *campaignUseCase) CreateCampaignImage(request dto.CampaignImageRequest, fileLocation string) *dto.ResponseContainer {
-	campaign, err := uc.campaignRepository.GetCampaignById(request.CampaignId)
+	campaign, err := uc.campaignRepository.GetCampaign(request.CampaignID)
 	if err != nil {
 		return dto.BuildResponse(
 			"Database query error or database connection problem",
@@ -187,7 +187,7 @@ func (uc *campaignUseCase) CreateCampaignImage(request dto.CampaignImageRequest,
 	if request.IsPrimary {
 		tempIsPrimary = 1
 
-		err := uc.campaignRepository.UpdateCampaignImageStatus(request.CampaignId)
+		err := uc.campaignRepository.UpdateCampaignImageStatus(request.CampaignID)
 		if err != nil {
 			return dto.BuildResponse(
 				"Database query error or database connection problem",
@@ -199,7 +199,7 @@ func (uc *campaignUseCase) CreateCampaignImage(request dto.CampaignImageRequest,
 	}
 
 	var campaignImage entity.CampaignImage
-	campaignImage.CampaignId = uint(request.CampaignId)
+	campaignImage.CampaignID = uint(request.CampaignID)
 	campaignImage.IsPrimary = tempIsPrimary
 	campaignImage.FileName = fileLocation
 

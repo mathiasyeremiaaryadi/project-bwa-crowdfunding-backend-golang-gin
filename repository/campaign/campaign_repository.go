@@ -26,20 +26,20 @@ func (r *campaignRepository) GetCampaigns() ([]entity.Campaign, error) {
 	return campaigns, nil
 }
 
-func (r *campaignRepository) GetCampaignByUserId(userId int) ([]entity.Campaign, error) {
+func (r *campaignRepository) GetCampaignByUserID(userID int) ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
-	if err := r.mysql.Where("user_id = ?", userId).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
+	if err := r.mysql.Where("user_id = ?", userID).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
 		return nil, err
 	}
 
 	return campaigns, nil
 }
 
-func (r *campaignRepository) GetCampaignById(campaignId int) (entity.Campaign, error) {
+func (r *campaignRepository) GetCampaign(CampaignID int) (entity.Campaign, error) {
 	var campaign entity.Campaign
 
-	if err := r.mysql.Preload("User").Preload("CampaignImages").Where("id = ?", campaignId).Find(&campaign).Error; err != nil {
+	if err := r.mysql.Preload("User").Preload("CampaignImages").Where("id = ?", CampaignID).Find(&campaign).Error; err != nil {
 		return campaign, err
 	}
 
@@ -70,8 +70,8 @@ func (r *campaignRepository) CreateCampaignImage(campaignImage entity.CampaignIm
 	return nil
 }
 
-func (r *campaignRepository) UpdateCampaignImageStatus(campaignId int) error {
-	if err := r.mysql.Model(&entity.CampaignImage{}).Where("campaign_id = ?", campaignId).Update("is_primary", false).Error; err != nil {
+func (r *campaignRepository) UpdateCampaignImageStatus(CampaignID int) error {
+	if err := r.mysql.Model(&entity.CampaignImage{}).Where("campaign_id = ?", CampaignID).Update("is_primary", false).Error; err != nil {
 		return err
 	}
 

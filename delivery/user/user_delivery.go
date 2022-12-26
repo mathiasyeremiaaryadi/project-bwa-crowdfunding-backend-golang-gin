@@ -160,7 +160,7 @@ func (d *userDelivery) GetUserByEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (d *userDelivery) GetUserById(c *gin.Context) {
+func (d *userDelivery) GetUser(c *gin.Context) {
 	var request dto.EmailCheckRequest
 
 	err := c.ShouldBindJSON(&request)

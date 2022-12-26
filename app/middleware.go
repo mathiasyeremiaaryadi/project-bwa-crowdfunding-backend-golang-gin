@@ -60,8 +60,8 @@ func AuthMiddleware(userUseCase userusecase.UserUseCase, jwtService utils.JWT) g
 			return
 		}
 
-		userId := int(claim["USER_ID"].(float64))
-		user, err := userUseCase.GetUserById(userId)
+		userID := int(claim["USER_ID"].(float64))
+		user, err := userUseCase.GetUser(userID)
 		if err != nil {
 			err := map[string]interface{}{"ERROR": "User not found"}
 			response := dto.BuildResponse(
