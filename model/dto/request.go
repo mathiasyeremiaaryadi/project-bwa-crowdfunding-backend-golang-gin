@@ -30,3 +30,9 @@ type CampaignRequest struct {
 	Perks            string `json:"perks" binding:"required"`
 	User             entity.User
 }
+
+type CampaignImageRequest struct {
+	CampaignId int  `form:"campaign_id" binding:"required"`
+	IsPrimary  bool `form:"is_primary" binding:"required"`
+	User       entity.User
+}

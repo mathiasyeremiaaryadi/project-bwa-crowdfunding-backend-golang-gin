@@ -141,7 +141,7 @@ func (uc *userUseCase) GetUserById(id int) (entity.User, error) {
 	return user, nil
 }
 
-func (uc *userUseCase) SaveUserAvatar(id int, fileLocation string) *dto.ResponseContainer {
+func (uc *userUseCase) CreateUserAvatar(id int, fileLocation string) *dto.ResponseContainer {
 	user, err := uc.userRepository.GetUserById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

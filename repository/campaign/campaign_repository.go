@@ -61,3 +61,19 @@ func (r *campaignRepository) UpdateCampaign(campaign entity.Campaign) (entity.Ca
 
 	return campaign, nil
 }
+
+func (r *campaignRepository) CreateCampaignImage(campaignImage entity.CampaignImage) error {
+	if err := r.mysql.Create(&campaignImage).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *campaignRepository) UpdateCampaignImageStatus(campaignId int) error {
+	if err := r.mysql.Model(&entity.CampaignImage{}).Where("campaign_id = ?", campaignId).Update("is_primary", false).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

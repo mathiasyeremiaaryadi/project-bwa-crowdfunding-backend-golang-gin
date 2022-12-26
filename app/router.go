@@ -34,13 +34,15 @@ func InitRoute(mysql *gorm.DB) *gin.Engine {
 		apiRouter.POST("/login", userDelivery.LoginUser)
 		apiRouter.POST("/register", userDelivery.RegisterUser)
 		apiRouter.POST("/email_checkers", userDelivery.GetUserByEmail)
-		apiRouter.POST("/avatars", AuthMiddleware(userUseCase, jwtService), userDelivery.SaveUserAvatar)
+		apiRouter.POST("/avatars", AuthMiddleware(userUseCase, jwtService), userDelivery.CreateUserAvatar)
 
 		apiRouter.GET("/campaigns", campaignDelivery.GetCampaigns)
 		apiRouter.GET("/campaigns/:id", campaignDelivery.GetCampaignById)
-		apiRouter.POST("/campaigns", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaign)
-		apiRouter.PUT("/campaigns/:id", AuthMiddleware(userUseCase, jwtService), campaignDelivery.UpdateCampaign)
 
+		apiRouter.POST("/campaigns", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaign)
+		apiRouter.POST("/campaigns-image", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaignImage)
+
+		apiRouter.PUT("/campaigns/:id", AuthMiddleware(userUseCase, jwtService), campaignDelivery.UpdateCampaign)
 	}
 
 	router.NoRoute(delivery.NoRoute)

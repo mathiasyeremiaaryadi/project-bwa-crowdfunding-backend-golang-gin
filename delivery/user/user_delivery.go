@@ -222,8 +222,8 @@ func (d *userDelivery) GetUserById(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (d *userDelivery) SaveUserAvatar(c *gin.Context) {
-	file, err := c.FormFile("AVATAR")
+func (d *userDelivery) CreateUserAvatar(c *gin.Context) {
+	file, err := c.FormFile("avatar")
 	if err != nil {
 		response := dto.BuildResponse(
 			"Avatar upload failed",
@@ -250,8 +250,7 @@ func (d *userDelivery) SaveUserAvatar(c *gin.Context) {
 	}
 
 	fullPath := fmt.Sprintf("images/%d-%s", authenticatedUser.ID, file.Filename)
-	err = c.SaveUploadedFile(file, fullPath)
-	if err != nil {
+	if err := c.SaveUploadedFile(file, fullPath); err != nil {
 		response := dto.BuildResponse(
 			"Avatar upload failed",
 			"FAILED",
@@ -263,7 +262,7 @@ func (d *userDelivery) SaveUserAvatar(c *gin.Context) {
 		return
 	}
 
-	response := d.userUseCase.SaveUserAvatar(1, fullPath)
+	response := d.userUseCase.CreateUserAvatar(1, fullPath)
 	if response.Meta.Code != http.StatusOK {
 		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return

@@ -7,7 +7,9 @@ import (
 type UserDelivery interface {
 	RegisterUser(c *gin.Context)
 	LoginUser(c *gin.Context)
+
 	GetUserByEmail(c *gin.Context)
 	GetUserById(c *gin.Context)
-	SaveUserAvatar(c *gin.Context)
+
+	CreateUserAvatar(c *gin.Context)
 }

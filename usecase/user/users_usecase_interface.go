@@ -8,7 +8,9 @@ import (
 type UserUseCase interface {
 	RegisterUser(dto.UserRegisterRequest) *dto.ResponseContainer
 	LoginUser(dto.UserLoginRequest) *dto.ResponseContainer
+
 	GetUserByEmail(dto.EmailCheckRequest) (bool, error)
 	GetUserById(int) (entity.User, error)
-	SaveUserAvatar(int, string) *dto.ResponseContainer
+
+	CreateUserAvatar(int, string) *dto.ResponseContainer
 }

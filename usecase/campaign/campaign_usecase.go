@@ -162,3 +162,61 @@ func (uc *campaignUseCase) UpdateCampaign(campaignId dto.CampaignUri, request dt
 		updatedCampaign,
 	)
 }
+
+func (uc *campaignUseCase) CreateCampaignImage(request dto.CampaignImageRequest, fileLocation string) *dto.ResponseContainer {
+	campaign, err := uc.campaignRepository.GetCampaignById(request.CampaignId)
+	if err != nil {
+		return dto.BuildResponse(
+			"Database query error or database connection problem",
+			"FAILED",
+			http.StatusInternalServerError,
+			map[string]interface{}{"ERROR": err.Error()},
+		)
+	}
+
+	if campaign.UserId != request.User.ID {
+		return dto.BuildResponse(
+			"Unauthorized",
+			"FAILED",
+			http.StatusUnauthorized,
+			map[string]interface{}{"ERROR": "Not an owner of the campaign"},
+		)
+	}
+
+	tempIsPrimary := 0
+	if request.IsPrimary {
+		tempIsPrimary = 1
+
+		err := uc.campaignRepository.UpdateCampaignImageStatus(request.CampaignId)
+		if err != nil {
+			return dto.BuildResponse(
+				"Database query error or database connection problem",
+				"FAILED",
+				http.StatusInternalServerError,
+				map[string]interface{}{"ERROR": err.Error()},
+			)
+		}
+	}
+
+	var campaignImage entity.CampaignImage
+	campaignImage.CampaignId = uint(request.CampaignId)
+	campaignImage.IsPrimary = tempIsPrimary
+	campaignImage.FileName = fileLocation
+
+	err = uc.campaignRepository.CreateCampaignImage(campaignImage)
+	if err != nil {
+		return dto.BuildResponse(
+			"Database query error or database connection problem",
+			"FAILED",
+			http.StatusInternalServerError,
+			map[string]interface{}{"ERROR": err.Error()},
+		)
+	}
+
+	return dto.BuildResponse(
+		"Campaign image has created successfully",
+		"SUCCESS",
+		http.StatusOK,
+		"Campaign image has uploaded and updated successfully",
+	)
+}
