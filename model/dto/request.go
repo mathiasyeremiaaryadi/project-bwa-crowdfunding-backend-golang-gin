@@ -36,3 +36,8 @@ type CampaignImageRequest struct {
 	IsPrimary  bool `form:"is_primary"`
 	User       entity.User
 }
+
+type TransactionUri struct {
+	ID   int `uri:"id" binding:"required"`
+	User entity.User
+}

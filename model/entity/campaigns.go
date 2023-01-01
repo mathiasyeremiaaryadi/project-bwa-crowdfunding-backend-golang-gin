@@ -15,11 +15,11 @@ type Campaign struct {
 	BackerCount      int
 	GoalAmount       int
 	CurrentAmount    int
-	Slug             string    `gorm:"varchar(50)"`
-	CreatedAt        time.Time `gorm:"autoCreateTime"`
-	UpdatedAt        time.Time `gorm:"autoUpdateTime"`
+	Slug             string `gorm:"varchar(50)"`
 	CampaignImages   []CampaignImage
 	User             User
+	CreatedAt        time.Time `gorm:"autoCreateTime"`
+	UpdatedAt        time.Time `gorm:"autoUpdateTime"`
 }
 
 type CampaignImage struct {
