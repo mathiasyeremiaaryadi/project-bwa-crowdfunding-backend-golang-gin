@@ -25,3 +25,13 @@ func (r *transactionrepository) GetTransactionsByCampaignID(campaignID int) ([]e
 
 	return transactions, nil
 }
+
+func (r *transactionrepository) GetTransactionsByUserID(userID int) ([]entity.Transaction, error) {
+	var transactions []entity.Transaction
+
+	if err := r.mysql.Preload("Campaign.CampaignImages", "campaign_images.is_primary = 1").Where("user_id = ?", userID).Find(&transactions).Error; err != nil {
+		return transactions, err
+	}
+
+	return transactions, nil
+}

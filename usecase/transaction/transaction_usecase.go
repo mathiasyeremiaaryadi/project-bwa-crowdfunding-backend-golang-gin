@@ -50,7 +50,45 @@ func (uc *transactionUseCase) GetTransactionsByCampaignID(transactionUri dto.Tra
 		)
 	}
 
+	if len(transactions) == 0 {
+		return dto.BuildResponse(
+			"Transactions not found",
+			"FAILED",
+			http.StatusNotFound,
+			map[string]interface{}{"ERROR": "not found"},
+		)
+	}
+
 	formattedTransactions := entity.GetTransactionsFormatter(transactions)
+	return dto.BuildResponse(
+		"Transactions have retrieved successfully",
+		"SUCCESS",
+		http.StatusOK,
+		formattedTransactions,
+	)
+}
+
+func (uc *transactionUseCase) GetTransactionsByUserID(userID int) *dto.ResponseContainer {
+	transactions, err := uc.transactionrepository.GetTransactionsByUserID(userID)
+	if err != nil {
+		return dto.BuildResponse(
+			"Database query error or database connection problem",
+			"FAILED",
+			http.StatusInternalServerError,
+			map[string]interface{}{"ERROR": err.Error()},
+		)
+	}
+
+	if len(transactions) == 0 {
+		return dto.BuildResponse(
+			"Transactions not found",
+			"FAILED",
+			http.StatusNotFound,
+			map[string]interface{}{"ERROR": "not found"},
+		)
+	}
+
+	formattedTransactions := entity.GetTransactionsByIDFormatter(transactions)
 	return dto.BuildResponse(
 		"Transactions have retrieved successfully",
 		"SUCCESS",

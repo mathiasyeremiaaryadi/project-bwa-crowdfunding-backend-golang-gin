@@ -49,8 +49,34 @@ func (d *transactionDelivery) GetTransactionsByCampaignID(c *gin.Context) {
 	}
 
 	response := d.transactionUseCase.GetTransactionsByCampaignID(transactionUri)
-	if response.Meta.Code == http.StatusInternalServerError {
+	if response.Meta.Code != http.StatusOK {
+		c.AbortWithStatusJSON(response.Meta.Code, response)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (d *transactionDelivery) GetTransactionsByUserID(c *gin.Context) {
+	var userID int
+
+	if authenticatedUser, ok := c.Value("authenticatedUser").(entity.User); ok {
+		userID = int(authenticatedUser.ID)
+	} else {
+		response := dto.BuildResponse(
+			"Authentication failed",
+			"FAILED",
+			http.StatusUnauthorized,
+			"not authenticated",
+		)
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	response := d.transactionUseCase.GetTransactionsByUserID(userID)
+	if response.Meta.Code != http.StatusOK {
+		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
 	}
 

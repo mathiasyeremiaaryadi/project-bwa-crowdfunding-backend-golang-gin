@@ -10,6 +10,7 @@ type Transaction struct {
 	Status     string `gorm:"varchar(10)"`
 	Code       string `gorm:"varchar(10)"`
 	User       User
+	Campaign   Campaign
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"autoUpdateTime"`
 }
@@ -19,6 +20,19 @@ type GetTransaction struct {
 	Name      string    `json:"name"`
 	Amount    int       `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type GetTransactionByUserID struct {
+	ID        uint                `json:"id"`
+	Amount    int                 `json:"amount"`
+	Status    string              `json:"status"`
+	CreatedAt time.Time           `json:"created_at"`
+	Campaign  TransactionCampaign `json:"campaign"`
+}
+
+type TransactionCampaign struct {
+	Name     string `json:"name"`
+	ImageURL string `json:"image_url"`
 }
 
 func GetTransactionFormatter(transaction Transaction) GetTransaction {
@@ -43,4 +57,39 @@ func GetTransactionsFormatter(transactions []Transaction) []GetTransaction {
 	}
 
 	return getTransactionsFormatter
+}
+
+func GetTransactionByUserIDFormatter(transaction Transaction) GetTransactionByUserID {
+	var getTransactionByUserID GetTransactionByUserID
+	getTransactionByUserID.ID = transaction.ID
+	getTransactionByUserID.Amount = transaction.Amount
+	getTransactionByUserID.Status = transaction.Status
+	getTransactionByUserID.CreatedAt = transaction.CreatedAt
+
+	var transactionCampaign TransactionCampaign
+	transactionCampaign.Name = transaction.Campaign.Name
+	transactionCampaign.ImageURL = ""
+
+	if len(transaction.Campaign.CampaignImages) > 0 {
+		transactionCampaign.ImageURL = transaction.Campaign.CampaignImages[0].FileName
+	}
+
+	getTransactionByUserID.Campaign = transactionCampaign
+
+	return getTransactionByUserID
+}
+
+func GetTransactionsByIDFormatter(transactions []Transaction) []GetTransactionByUserID {
+	if len(transactions) == 0 {
+		return []GetTransactionByUserID{}
+	}
+
+	var getTransactionsByUserID []GetTransactionByUserID
+
+	for _, transaction := range transactions {
+		getTransactionFormatter := GetTransactionByUserIDFormatter(transaction)
+		getTransactionsByUserID = append(getTransactionsByUserID, getTransactionFormatter)
+	}
+
+	return getTransactionsByUserID
 }

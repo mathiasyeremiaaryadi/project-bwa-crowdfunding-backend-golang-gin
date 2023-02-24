@@ -6,4 +6,5 @@ import (
 
 type TransactionDelivery interface {
 	GetTransactionsByCampaignID(c *gin.Context)
+	GetTransactionsByUserID(c *gin.Context)
 }
