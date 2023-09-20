@@ -5,7 +5,7 @@ import "time"
 type Transaction struct {
 	ID         uint `gorm:"primaryKey"`
 	CampaignID int
-	UserID     int
+	UserID     uint
 	Amount     int
 	Status     string `gorm:"varchar(10)"`
 	Code       string `gorm:"varchar(10)"`
@@ -33,6 +33,12 @@ type GetTransactionByUserID struct {
 type TransactionCampaign struct {
 	Name     string `json:"name"`
 	ImageURL string `json:"image_url"`
+}
+
+type TransactionCreated struct {
+	Amount     int `json:"amount" binding:"required"`
+	CampaignID int `json:"campaign_id" binding:"required"`
+	User       User
 }
 
 func GetTransactionFormatter(transaction Transaction) GetTransaction {

@@ -50,6 +50,7 @@ func InitRoute(mysql *gorm.DB) *gin.Engine {
 
 		apiRouter.POST("/campaigns", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaign)
 		apiRouter.POST("/campaigns-image", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaignImage)
+		apiRouter.POST("/transactions", AuthMiddleware(userUseCase, jwtService), transactionDelivery.CreateTransaction)
 
 		apiRouter.PUT("/campaigns/:id", AuthMiddleware(userUseCase, jwtService), campaignDelivery.UpdateCampaign)
 

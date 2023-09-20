@@ -96,3 +96,29 @@ func (uc *transactionUseCase) GetTransactionsByUserID(userID int) *dto.ResponseC
 		formattedTransactions,
 	)
 }
+
+func (uc *transactionUseCase) CreateTransaction(transactionCreated entity.TransactionCreated) *dto.ResponseContainer {
+	transaction := entity.Transaction{}
+	transaction.CampaignID = transactionCreated.CampaignID
+	transaction.Amount = transactionCreated.Amount
+	transaction.UserID = transactionCreated.User.ID
+	transaction.Status = "pending"
+
+	savedTransaction, err := uc.transactionrepository.CreateTransaction(transaction)
+	if err != nil {
+		return dto.BuildResponse(
+			"Database query error or database connection problem",
+			"FAILED",
+			http.StatusInternalServerError,
+			map[string]interface{}{"ERROR": err.Error()},
+		)
+	}
+
+	return dto.BuildResponse(
+		"Transactions have saved successfully",
+		"SUCCESS",
+		http.StatusCreated,
+		savedTransaction,
+	)
+
+}

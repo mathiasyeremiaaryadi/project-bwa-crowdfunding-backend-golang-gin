@@ -35,3 +35,11 @@ func (r *transactionrepository) GetTransactionsByUserID(userID int) ([]entity.Tr
 
 	return transactions, nil
 }
+
+func (r *transactionrepository) CreateTransaction(transaction entity.Transaction) (entity.Transaction, error) {
+	if err := r.mysql.Create(&transaction).Error; err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
+}
