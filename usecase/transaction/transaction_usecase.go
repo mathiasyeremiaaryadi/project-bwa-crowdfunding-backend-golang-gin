@@ -6,17 +6,20 @@ import (
 	"service-campaign-startup/model/entity"
 	campaignrepository "service-campaign-startup/repository/campaign"
 	transactionrepository "service-campaign-startup/repository/transaction"
+	paymentusecase "service-campaign-startup/usecase/payment"
 )
 
 type transactionUseCase struct {
 	transactionrepository transactionrepository.TransactionRepository
 	campaignRepository    campaignrepository.CampaignRepository
+	paymentUseCase        paymentusecase.PaymentUsecase
 }
 
-func NewTransactionUseCase(transactionrepository transactionrepository.TransactionRepository, campaignRepository campaignrepository.CampaignRepository) TransactionUseCase {
+func NewTransactionUseCase(transactionrepository transactionrepository.TransactionRepository, campaignRepository campaignrepository.CampaignRepository, paymentUseCase paymentusecase.PaymentUsecase) TransactionUseCase {
 	return &transactionUseCase{
 		transactionrepository: transactionrepository,
 		campaignRepository:    campaignRepository,
+		paymentUseCase:        paymentUseCase,
 	}
 }
 
@@ -114,11 +117,31 @@ func (uc *transactionUseCase) CreateTransaction(transactionCreated entity.Transa
 		)
 	}
 
+	paymentURL, err := uc.paymentUseCase.GetPaymentURL(transaction, savedTransaction.User)
+	if err != nil {
+		return dto.BuildResponse(
+			"Cannot retrieve payment URL",
+			"FAILED",
+			http.StatusInternalServerError,
+			map[string]interface{}{"ERROR": err.Error()},
+		)
+	}
+
+	savedTransaction.PaymentURL = paymentURL
+	savedTransaction, err = uc.transactionrepository.UpdateTransaction(savedTransaction)
+	if err != nil {
+		return dto.BuildResponse(
+			"Failed to update transaction",
+			"FAILED",
+			http.StatusInternalServerError,
+			map[string]interface{}{"ERROR": err.Error()},
+		)
+	}
+
 	return dto.BuildResponse(
 		"Transactions have saved successfully",
 		"SUCCESS",
 		http.StatusCreated,
-		savedTransaction,
+		entity.GetTransactionPaymentFormatter(savedTransaction),
 	)
-
 }

@@ -9,6 +9,7 @@ type Transaction struct {
 	Amount     int
 	Status     string `gorm:"varchar(10)"`
 	Code       string `gorm:"varchar(10)"`
+	PaymentURL string
 	User       User
 	Campaign   Campaign
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
@@ -39,6 +40,17 @@ type TransactionCreated struct {
 	Amount     int `json:"amount" binding:"required"`
 	CampaignID int `json:"campaign_id" binding:"required"`
 	User       User
+}
+
+type TransactionPayment struct {
+	ID         uint      `json:"id"`
+	CampaignID int       `json:"campaign_id"`
+	UserID     uint      `json:"user_id"`
+	Amount     int       `json:"amount"`
+	Status     string    `json:"status"`
+	Code       string    `json:"code"`
+	PaymentURL string    `json:"payment_url"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 func GetTransactionFormatter(transaction Transaction) GetTransaction {
@@ -98,4 +110,18 @@ func GetTransactionsByIDFormatter(transactions []Transaction) []GetTransactionBy
 	}
 
 	return getTransactionsByUserID
+}
+
+func GetTransactionPaymentFormatter(transaction Transaction) TransactionPayment {
+	var tranasctionPayment TransactionPayment
+	tranasctionPayment.ID = transaction.ID
+	tranasctionPayment.CampaignID = transaction.CampaignID
+	tranasctionPayment.UserID = transaction.UserID
+	tranasctionPayment.Status = transaction.Status
+	tranasctionPayment.Amount = transaction.Amount
+	tranasctionPayment.Code = transaction.Code
+	tranasctionPayment.PaymentURL = transaction.PaymentURL
+	tranasctionPayment.CreatedAt = transaction.CreatedAt
+
+	return tranasctionPayment
 }

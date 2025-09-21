@@ -74,7 +74,7 @@ func (uc *campaignUseCase) GetCampaign(campaignUri dto.CampaignUri) *dto.Respons
 			"User not found",
 			"FAILED",
 			http.StatusNotFound,
-			map[string]interface{}{"ERROR": err.Error()},
+			map[string]interface{}{"ERROR": "Campaign not found"},
 		)
 	}
 

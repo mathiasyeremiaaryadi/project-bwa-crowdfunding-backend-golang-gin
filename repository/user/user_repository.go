@@ -1,23 +1,22 @@
 package userrepository
 
 import (
+	"service-campaign-startup/config"
 	"service-campaign-startup/model/entity"
-
-	"gorm.io/gorm"
 )
 
 type userRepository struct {
-	mysql *gorm.DB
+	dependencies *config.DependencyFacade
 }
 
-func NewUserRepository(mysql *gorm.DB) UserRepository {
+func NewUserRepository(dependencies *config.DependencyFacade) UserRepository {
 	return &userRepository{
-		mysql: mysql,
+		dependencies: dependencies,
 	}
 }
 
 func (r *userRepository) RegisterUser(user entity.User) (entity.User, error) {
-	if err := r.mysql.Create(&user).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Create(&user).Error; err != nil {
 		return user, err
 	}
 
@@ -27,7 +26,7 @@ func (r *userRepository) RegisterUser(user entity.User) (entity.User, error) {
 func (r *userRepository) GetUserByEmail(email string) (entity.User, error) {
 	var user entity.User
 
-	if err := r.mysql.Where("email = ?", email).Take(&user).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Where("email = ?", email).Take(&user).Error; err != nil {
 		return user, err
 	}
 
@@ -37,7 +36,7 @@ func (r *userRepository) GetUserByEmail(email string) (entity.User, error) {
 func (r *userRepository) GetUser(id int) (entity.User, error) {
 	var user entity.User
 
-	if err := r.mysql.First(&user, id).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().First(&user, id).Error; err != nil {
 		return user, err
 	}
 
@@ -45,7 +44,7 @@ func (r *userRepository) GetUser(id int) (entity.User, error) {
 }
 
 func (r *userRepository) UpdateUser(user entity.User) (entity.User, error) {
-	if err := r.mysql.Save(&user).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Save(&user).Error; err != nil {
 		return user, err
 	}
 

@@ -3,49 +3,68 @@ package config
 import (
 	"fmt"
 	"log"
+	"os"
+	"service-campaign-startup/model/entity"
+	"time"
 
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-func ConnectMySQL() *gorm.DB {
-	dsn := fmt.Sprintf(
-		`%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local`,
-		CONFIG["MYSQL_USER"],
-		CONFIG["MYSQL_HOST"],
-		CONFIG["MYSQL_PORT"],
-		CONFIG["MYSQL_SCHEMA"],
+func NewMySQLConnection(logrusLogger *logrus.Logger) *gorm.DB {
+	logrusLogger.Info("Establishing MySQL connection . . .")
+
+	dsn := fmt.Sprintf(`%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local`, viper.GetString("MYSQL_USERNAME"), viper.GetString("MYSQL_PASSWORD"), viper.GetString("MYSQL_HOST"), viper.GetString("MYSQL_PORT"), viper.GetString("MYSQL_DATABASE"))
+
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Silent,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		},
 	)
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	MySQLDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+	})
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logrusLogger.Fatalf("Failed to establish MySQL conenction: %+v", err)
 	}
 
-	fmt.Println("MySQL Database is Connected")
+	logrusLogger.Info("MySQL connection successfull")
 
-	// err = db.AutoMigrate(&entity.User{})
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	logrusLogger.Info("Migrating MySQL tables . . .")
+	err = MySQLDB.Debug().AutoMigrate(&entity.User{})
+	if err != nil {
+		logrusLogger.Fatalf("Failed to migrate MySQL table User: %+v", err)
+	}
+	logrusLogger.Info("Migrated User table successfully")
 
-	// err = db.AutoMigrate(&entity.Campaign{})
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	err = MySQLDB.Debug().AutoMigrate(&entity.Campaign{})
+	if err != nil {
+		logrusLogger.Fatalf("Failed to migrate MySQL table Campaign: %+v", err)
+	}
+	logrusLogger.Info("Migrated Campign table successfully")
 
-	// err = db.AutoMigrate(&entity.CampaignImage{})
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	err = MySQLDB.Debug().AutoMigrate(&entity.CampaignImage{})
+	if err != nil {
+		logrusLogger.Fatalf("Failed to migrate MySQL table CampaignImage: %+v", err)
+	}
+	logrusLogger.Info("Migrated CampignImage table successfully")
 
-	// err = db.AutoMigrate(&entity.Transaction{})
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	err = MySQLDB.Debug().AutoMigrate(&entity.Transaction{})
+	if err != nil {
+		logrusLogger.Fatalf("Failed to migrate MySQL table Transaction: %+v", err)
+	}
+	logrusLogger.Info("Migrated Transaction table successfully")
 
-	fmt.Println("All Schema is Migrated")
+	logrusLogger.Info("All tables are migrated successfully")
 
-	return db
+	return MySQLDB
 }

@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"service-campaign-startup/app"
 	"service-campaign-startup/config"
+
+	"github.com/spf13/viper"
 )
 
 func main() {
-	config.InitConfig()
+	dependencies := config.NewDepenencies()
 
-	db := config.ConnectMySQL()
+	applicationServer := fmt.Sprintf("localhost:%s", viper.GetString("APP_PORT"))
 
-	router := app.InitRoute(db)
-
-	appHost := fmt.Sprintf("localhost:%s", config.CONFIG["PORT"])
-	router.Run(appHost)
+	router := app.NewRoute(dependencies)
+	router.Run(applicationServer)
 }

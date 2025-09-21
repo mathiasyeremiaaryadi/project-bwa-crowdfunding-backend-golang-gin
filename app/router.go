@@ -1,6 +1,7 @@
 package app
 
 import (
+	"service-campaign-startup/config"
 	"service-campaign-startup/delivery"
 	campaigndelivery "service-campaign-startup/delivery/campaign"
 	transactiondelivery "service-campaign-startup/delivery/transaction"
@@ -9,28 +10,30 @@ import (
 	transactionrepository "service-campaign-startup/repository/transaction"
 	userrepository "service-campaign-startup/repository/user"
 	campaignusecase "service-campaign-startup/usecase/campaign"
+	paymentusecase "service-campaign-startup/usecase/payment"
 	transactionusecase "service-campaign-startup/usecase/transaction"
 	userusecase "service-campaign-startup/usecase/user"
 	"service-campaign-startup/utils"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func InitRoute(mysql *gorm.DB) *gin.Engine {
+func NewRoute(dependencies *config.DependencyFacade) *gin.Engine {
 
 	jwtService := utils.NewJwtService()
 
-	userRepository := userrepository.NewUserRepository(mysql)
+	userRepository := userrepository.NewUserRepository(dependencies)
 	userUseCase := userusecase.NewUserUseCase(userRepository, jwtService)
 	userDelivery := userdelivery.NewUserDelivery(userUseCase)
 
-	campaignRepository := campaignrepository.NewCampaignRepository(mysql)
+	campaignRepository := campaignrepository.NewCampaignRepository(dependencies)
 	campaignUseCase := campaignusecase.NewCampaignUseCase(campaignRepository)
 	campaignDelivery := campaigndelivery.NewCampaignDelivery(campaignUseCase)
 
-	transactionRepository := transactionrepository.NewTransactionRepository(mysql)
-	transactionUseCase := transactionusecase.NewTransactionUseCase(transactionRepository, campaignRepository)
+	paymentUseCase := paymentusecase.NewPaymentUseCase()
+
+	transactionRepository := transactionrepository.NewTransactionRepository(dependencies)
+	transactionUseCase := transactionusecase.NewTransactionUseCase(transactionRepository, campaignRepository, paymentUseCase)
 	transactionDelivery := transactiondelivery.NewTransactionDelivery(transactionUseCase)
 
 	router := gin.Default()
@@ -46,14 +49,13 @@ func InitRoute(mysql *gorm.DB) *gin.Engine {
 		apiRouter.GET("/campaigns", campaignDelivery.GetCampaigns)
 		apiRouter.GET("/campaigns/:id", campaignDelivery.GetCampaign)
 		apiRouter.GET("/campaigns/:id/transactions", AuthMiddleware(userUseCase, jwtService), transactionDelivery.GetTransactionsByCampaignID)
-		apiRouter.GET("/transactions", AuthMiddleware(userUseCase, jwtService), transactionDelivery.GetTransactionsByUserID)
+		apiRouter.PUT("/campaigns/:id", AuthMiddleware(userUseCase, jwtService), campaignDelivery.UpdateCampaign)
 
 		apiRouter.POST("/campaigns", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaign)
 		apiRouter.POST("/campaigns-image", AuthMiddleware(userUseCase, jwtService), campaignDelivery.CreateCampaignImage)
+
+		apiRouter.GET("/transactions", AuthMiddleware(userUseCase, jwtService), transactionDelivery.GetTransactionsByUserID)
 		apiRouter.POST("/transactions", AuthMiddleware(userUseCase, jwtService), transactionDelivery.CreateTransaction)
-
-		apiRouter.PUT("/campaigns/:id", AuthMiddleware(userUseCase, jwtService), campaignDelivery.UpdateCampaign)
-
 	}
 
 	router.NoRoute(delivery.NoRoute)

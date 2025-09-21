@@ -1,25 +1,24 @@
 package campaignrepository
 
 import (
+	"service-campaign-startup/config"
 	"service-campaign-startup/model/entity"
-
-	"gorm.io/gorm"
 )
 
 type campaignRepository struct {
-	mysql *gorm.DB
+	dependencies *config.DependencyFacade
 }
 
-func NewCampaignRepository(mysql *gorm.DB) CampaignRepository {
+func NewCampaignRepository(dependencies *config.DependencyFacade) CampaignRepository {
 	return &campaignRepository{
-		mysql: mysql,
+		dependencies: dependencies,
 	}
 }
 
 func (r *campaignRepository) GetCampaigns() ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
-	if err := r.mysql.Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
 		return nil, err
 	}
 
@@ -29,7 +28,7 @@ func (r *campaignRepository) GetCampaigns() ([]entity.Campaign, error) {
 func (r *campaignRepository) GetCampaignByUserID(userID int) ([]entity.Campaign, error) {
 	var campaigns []entity.Campaign
 
-	if err := r.mysql.Where("user_id = ?", userID).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Where("user_id = ?", userID).Preload("CampaignImages", "campaign_images.is_primary = ?", 1).Find(&campaigns).Error; err != nil {
 		return nil, err
 	}
 
@@ -39,7 +38,7 @@ func (r *campaignRepository) GetCampaignByUserID(userID int) ([]entity.Campaign,
 func (r *campaignRepository) GetCampaign(CampaignID int) (entity.Campaign, error) {
 	var campaign entity.Campaign
 
-	if err := r.mysql.Preload("User").Preload("CampaignImages").Where("id = ?", CampaignID).Find(&campaign).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Preload("User").Preload("CampaignImages").Where("id = ?", CampaignID).Find(&campaign).Error; err != nil {
 		return campaign, err
 	}
 
@@ -47,7 +46,7 @@ func (r *campaignRepository) GetCampaign(CampaignID int) (entity.Campaign, error
 }
 
 func (r *campaignRepository) CreateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
-	if err := r.mysql.Create(&campaign).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Create(&campaign).Error; err != nil {
 		return campaign, err
 	}
 
@@ -55,7 +54,7 @@ func (r *campaignRepository) CreateCampaign(campaign entity.Campaign) (entity.Ca
 }
 
 func (r *campaignRepository) UpdateCampaign(campaign entity.Campaign) (entity.Campaign, error) {
-	if err := r.mysql.Save(&campaign).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Save(&campaign).Error; err != nil {
 		return campaign, err
 	}
 
@@ -63,7 +62,7 @@ func (r *campaignRepository) UpdateCampaign(campaign entity.Campaign) (entity.Ca
 }
 
 func (r *campaignRepository) CreateCampaignImage(campaignImage entity.CampaignImage) error {
-	if err := r.mysql.Create(&campaignImage).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Create(&campaignImage).Error; err != nil {
 		return err
 	}
 
@@ -71,7 +70,7 @@ func (r *campaignRepository) CreateCampaignImage(campaignImage entity.CampaignIm
 }
 
 func (r *campaignRepository) UpdateCampaignImageStatus(CampaignID int) error {
-	if err := r.mysql.Model(&entity.CampaignImage{}).Where("campaign_id = ?", CampaignID).Update("is_primary", false).Error; err != nil {
+	if err := r.dependencies.MySQLDB.Debug().Model(&entity.CampaignImage{}).Where("campaign_id = ?", CampaignID).Update("is_primary", false).Error; err != nil {
 		return err
 	}
 

@@ -1,37 +1,19 @@
 package config
 
 import (
-	"os"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
-const LOCAL = "local"
+func NewConfigurationEnvironment(logrusLogger *logrus.Logger) {
+	viper.SetConfigName("env")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
 
-const ENVIRONMENT string = LOCAL
+	viper.AutomaticEnv()
 
-var env = map[string]map[string]string{
-	"local": {
-		"PORT": "8080",
-
-		"MYSQL_HOST":   "127.0.0.1",
-		"MYSQL_PORT":   "3306",
-		"MYSQL_USER":   "root",
-		"MYSQL_PASS":   "",
-		"MYSQL_SCHEMA": "db_campaign_startup",
-	},
-}
-
-var CONFIG = env[ENVIRONMENT]
-
-func Getenv(key string, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
-
-func InitConfig() {
-	for key := range CONFIG {
-		CONFIG[key] = Getenv(key, CONFIG[key])
-		os.Setenv(key, CONFIG[key])
+	err := viper.ReadInConfig()
+	if err != nil {
+		logrusLogger.Fatalf("Failed to load environment configuration: %v", err)
 	}
 }
