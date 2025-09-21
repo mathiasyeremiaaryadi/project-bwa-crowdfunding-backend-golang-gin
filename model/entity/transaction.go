@@ -53,6 +53,13 @@ type TransactionPayment struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
+type TransactionNotification struct {
+	TransactionStatus string `json:"transaction_status"`
+	OrderID           string `json:"order_id"`
+	PaymentType       string `json:"payment_type"`
+	FraudStatus       string `json:"fraud_status"`
+}
+
 func GetTransactionFormatter(transaction Transaction) GetTransaction {
 	return GetTransaction{
 		ID:        transaction.ID,

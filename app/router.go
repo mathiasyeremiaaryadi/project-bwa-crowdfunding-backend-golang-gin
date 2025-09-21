@@ -30,11 +30,10 @@ func NewRoute(dependencies *config.DependencyFacade) *gin.Engine {
 	campaignUseCase := campaignusecase.NewCampaignUseCase(campaignRepository)
 	campaignDelivery := campaigndelivery.NewCampaignDelivery(campaignUseCase)
 
-	paymentUseCase := paymentusecase.NewPaymentUseCase()
-
 	transactionRepository := transactionrepository.NewTransactionRepository(dependencies)
+	paymentUseCase := paymentusecase.NewPaymentUseCase(transactionRepository, campaignRepository)
 	transactionUseCase := transactionusecase.NewTransactionUseCase(transactionRepository, campaignRepository, paymentUseCase)
-	transactionDelivery := transactiondelivery.NewTransactionDelivery(transactionUseCase)
+	transactionDelivery := transactiondelivery.NewTransactionDelivery(transactionUseCase, paymentUseCase)
 
 	router := gin.Default()
 	router.Static("/images", "./images")

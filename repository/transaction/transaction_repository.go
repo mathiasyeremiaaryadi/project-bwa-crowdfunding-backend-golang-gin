@@ -25,6 +25,16 @@ func (r *transactionrepository) GetTransactionsByCampaignID(campaignID int) ([]e
 	return transactions, nil
 }
 
+func (r *transactionrepository) GetTransaction(transactionID int) (entity.Transaction, error) {
+	var transaction entity.Transaction
+
+	if err := r.dependencies.MySQLDB.Debug().Where("id = ?", transactionID).Find(&transaction).Error; err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
+}
+
 func (r *transactionrepository) GetTransactionsByUserID(userID int) ([]entity.Transaction, error) {
 	var transactions []entity.Transaction
 

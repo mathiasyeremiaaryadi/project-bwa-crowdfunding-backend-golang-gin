@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"service-campaign-startup/model/dto"
 	"service-campaign-startup/model/entity"
+	paymentusecase "service-campaign-startup/usecase/payment"
 	transactionusecase "service-campaign-startup/usecase/transaction"
 	"service-campaign-startup/utils"
 
@@ -14,11 +15,13 @@ import (
 
 type transactionDelivery struct {
 	transactionUseCase transactionusecase.TransactionUseCase
+	paymentUseCase     paymentusecase.PaymentUsecase
 }
 
-func NewTransactionDelivery(transactionUseCase transactionusecase.TransactionUseCase) TransactionDelivery {
+func NewTransactionDelivery(transactionUseCase transactionusecase.TransactionUseCase, paymentUseCase paymentusecase.PaymentUsecase) TransactionDelivery {
 	return &transactionDelivery{
 		transactionUseCase: transactionUseCase,
+		paymentUseCase:     paymentUseCase,
 	}
 }
 
@@ -129,6 +132,43 @@ func (d *transactionDelivery) CreateTransaction(c *gin.Context) {
 	}
 
 	response := d.transactionUseCase.CreateTransaction(transactionCreated)
+	if response.Meta.Code != http.StatusOK {
+		c.AbortWithStatusJSON(response.Meta.Code, response)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (d *transactionDelivery) GetTransactionNotification(c *gin.Context) {
+	var transactionNotification entity.TransactionNotification
+
+	if err := c.ShouldBindJSON(&transactionNotification); err != nil {
+		if errors.Is(err, io.EOF) {
+			response := dto.BuildResponse(
+				"Body request bind failed",
+				"FAILED",
+				http.StatusBadRequest,
+				map[string]interface{}{"errors": err.Error()},
+			)
+
+			c.AbortWithStatusJSON(http.StatusBadRequest, response)
+			return
+		}
+
+		errors := utils.ValidationFormatter(err)
+		response := dto.BuildResponse(
+			"Body request validation failed",
+			"FAILED",
+			http.StatusBadRequest,
+			map[string]interface{}{"errors": errors},
+		)
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := d.paymentUseCase.ProcessPayment(transactionNotification)
 	if response.Meta.Code != http.StatusOK {
 		c.AbortWithStatusJSON(response.Meta.Code, response)
 		return
