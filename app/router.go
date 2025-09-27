@@ -46,6 +46,7 @@ func NewRoute(dependencies *config.DependencyFacade) *gin.Engine {
 		apiRouter.POST("/register", userDelivery.RegisterUser)
 		apiRouter.POST("/email_checkers", userDelivery.GetUserByEmail)
 		apiRouter.POST("/avatars", AuthMiddleware(userUseCase, jwtService), userDelivery.CreateUserAvatar)
+		apiRouter.GET("/users/fetch", AuthMiddleware(userUseCase, jwtService), userDelivery.GetAuthenticatedUser)
 
 		apiRouter.GET("/campaigns", campaignDelivery.GetCampaigns)
 		apiRouter.GET("/campaigns/:id", campaignDelivery.GetCampaign)

@@ -270,3 +270,16 @@ func (d *userDelivery) CreateUserAvatar(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (d *userDelivery) GetAuthenticatedUser(c *gin.Context) {
+	authenticatedUser := c.MustGet("authenticatedUser").(entity.User)
+	authenticatedUserFormatted := entity.UserCreatedFormatter(authenticatedUser, "")
+	response := dto.BuildResponse(
+		"User has retrieved successfully",
+		"SUCCESS",
+		http.StatusOK,
+		authenticatedUserFormatted,
+	)
+
+	c.JSON(http.StatusOK, response)
+}
