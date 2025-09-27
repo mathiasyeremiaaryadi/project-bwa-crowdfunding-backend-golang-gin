@@ -117,7 +117,7 @@ func (uc *transactionUseCase) CreateTransaction(transactionCreated entity.Transa
 		)
 	}
 
-	paymentURL, err := uc.paymentUseCase.GetPaymentURL(transaction, savedTransaction.User)
+	paymentURL, err := uc.paymentUseCase.GetPaymentURL(savedTransaction, savedTransaction.User)
 	if err != nil {
 		return dto.BuildResponse(
 			"Cannot retrieve payment URL",

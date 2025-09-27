@@ -26,8 +26,8 @@ func NewPaymentUseCase(transactionRepository transactionrepository.TransactionRe
 }
 
 func (pu paymentUseCase) GetPaymentURL(transaction entity.Transaction, user entity.User) (string, error) {
-	midtrans.ServerKey = ""
-	midtrans.ClientKey = ""
+	midtrans.ServerKey = "Mid-server-_MQzecDq22Aw1vZ2eHXBkDSq"
+	midtrans.ClientKey = "Mid-client-si5Pu9NOYCVpMrkU"
 	midtrans.Environment = midtrans.Sandbox
 
 	snapRequest := &snap.Request{

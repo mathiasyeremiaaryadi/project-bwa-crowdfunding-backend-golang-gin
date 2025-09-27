@@ -15,6 +15,7 @@ import (
 	userusecase "service-campaign-startup/usecase/user"
 	"service-campaign-startup/utils"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,6 +37,7 @@ func NewRoute(dependencies *config.DependencyFacade) *gin.Engine {
 	transactionDelivery := transactiondelivery.NewTransactionDelivery(transactionUseCase, paymentUseCase)
 
 	router := gin.Default()
+	router.Use(cors.Default())
 	router.Static("/images", "./images")
 
 	apiRouter := router.Group("/api/v1")
@@ -55,6 +57,8 @@ func NewRoute(dependencies *config.DependencyFacade) *gin.Engine {
 
 		apiRouter.GET("/transactions", AuthMiddleware(userUseCase, jwtService), transactionDelivery.GetTransactionsByUserID)
 		apiRouter.POST("/transactions", AuthMiddleware(userUseCase, jwtService), transactionDelivery.CreateTransaction)
+		apiRouter.POST("/transactions/notification", transactionDelivery.GetTransactionNotification)
+
 	}
 
 	router.NoRoute(delivery.NoRoute)
